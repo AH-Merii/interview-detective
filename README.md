@@ -84,6 +84,11 @@ mise run check    # every check: lint, types, tests with coverage, complexity, s
 The tests run offline, with Chromium and niri faked (`python3 -m unittest discover -s tests`).
 `tests/test_live.py` checks the real Glassdoor; its docstring says how to run it.
 
+Releases are automatic. PR titles follow [Conventional Commits](https://www.conventionalcommits.org/), and
+release-please keeps a release PR open that bumps `version.txt` and `CHANGELOG.md`. The
+interview-detective-bot App merges it once CI passes, which tags `vX.Y.Z` and publishes the release
+(`.github/workflows/release.yml`).
+
 ## License
 
 [MIT](LICENSE), copyright 2026 AH-Merii (AbdulHamid Merii).
