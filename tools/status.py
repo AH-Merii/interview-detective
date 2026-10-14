@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 """Rebuild _index/log.md from what exists in interviews/*/. Never edit the log by hand.
 
 A stage is done when its output exists:
