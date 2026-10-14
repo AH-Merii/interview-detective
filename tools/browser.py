@@ -261,15 +261,15 @@ def start(urls):
     if not prefs.exists():  # downloads go here, never the user's folder, and never ask where
         prefs.write_text(json.dumps({"download": {"default_directory": str(DOWNLOADS), "prompt_for_download": False}}))
     (PROFILE / "DevToolsActivePort").unlink(missing_ok=True)
-    log = open(HOME / "chromium.log", "w")
     env = {k: v for k, v in os.environ.items() if k not in ("XDG_ACTIVATION_TOKEN", "DESKTOP_STARTUP_ID")}
-    proc = subprocess.Popen(
-        ["chromium", f"--class={APP_ID}", f"--user-data-dir={PROFILE}", *FLAGS, *(urls or ["about:blank"])],
-        stdout=log,
-        stderr=log,
-        env=env,
-        start_new_session=True,
-    )
+    with open(HOME / "chromium.log", "w") as log:  # Chromium keeps its own copy of the descriptor
+        proc = subprocess.Popen(
+            ["chromium", f"--class={APP_ID}", f"--user-data-dir={PROFILE}", *FLAGS, *(urls or ["about:blank"])],
+            stdout=log,
+            stderr=log,
+            env=env,
+            start_new_session=True,
+        )
     for _ in range(100):
         try:
             p = int((PROFILE / "DevToolsActivePort").read_text().split()[0])
@@ -299,7 +299,7 @@ def stop(forget):
     print("stopped" + (" and forgot the profile" if forget else ""))
 
 
-def main():
+def parser():
     p = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     sub = p.add_subparsers(dest="cmd", required=True)
     sub.add_parser("start").add_argument("urls", nargs="*")
@@ -324,16 +324,53 @@ def main():
     s = tabbed("scroll")
     s.add_argument("direction", choices=["up", "down"])
     s.add_argument("n", type=int, nargs="?", default=1)
-    a = p.parse_args()
+    return p
 
+
+def shot(t, file):
+    Path(file).write_bytes(base64.b64decode(t.call("Page.captureScreenshot", format="png")["data"]))
+    print(file)
+
+
+def click(t, x, y):
+    t.mouse("mouseMoved", x, y)
+    t.mouse("mousePressed", x, y, button="left", clickCount=1)
+    t.mouse("mouseReleased", x, y, button="left", clickCount=1)
+
+
+def scroll(t, direction, n):
+    x, y = t.js("[innerWidth/2, innerHeight/2]")
+    t.mouse("mouseWheel", x, y, deltaX=0, deltaY=(-400 if direction == "up" else 400) * n)
+
+
+def goto(t, url):
+    t.goto(url)
+    print("loaded", url)
+
+
+# The commands that act on one tab (-t).
+TAB_COMMANDS = {
+    "text": lambda t, a: print(t.text()[: a.max]),
+    "js": lambda t, a: print(json.dumps(t.js(a.expr), ensure_ascii=False)),
+    "goto": lambda t, a: goto(t, a.url),
+    "shot": lambda t, a: shot(t, a.file),
+    "click": lambda t, a: click(t, a.x, a.y),
+    "type": lambda t, a: t.call("Input.insertText", text=a.text),
+    "key": lambda t, a: [t.press(n) for n in a.names],
+    "scroll": lambda t, a: scroll(t, a.direction, a.n),
+}
+
+
+def main():
+    a = parser().parse_args()
     if a.cmd == "start":
         return start(a.urls)
-    if a.cmd != "stop" and STATE.exists():
+    if a.cmd == "stop":
+        return stop(a.forget)
+    if STATE.exists():
         n = gather(json.loads(STATE.read_text())["pid"])  # a login popup opened since the last command
         if n:
             print(f"(moved {n} browser window(s) to the '{WORKSPACE}' workspace)", file=sys.stderr)
-    if a.cmd == "stop":
-        return stop(a.forget)
     if a.cmd == "tabs":
         for i, t in enumerate(tabs()):
             print(f"{i}\t{t['title'][:60]}\t{t['url']}")
@@ -341,30 +378,7 @@ def main():
     if a.cmd == "open":
         new_tab(a.url)
         return print("opened in the background:", a.url)
-
-    t = Tab(a.tab)
-    if a.cmd == "text":
-        print(t.text()[: a.max])
-    elif a.cmd == "js":
-        print(json.dumps(t.js(a.expr), ensure_ascii=False))
-    elif a.cmd == "goto":
-        t.goto(a.url)
-        print("loaded", a.url)
-    elif a.cmd == "shot":
-        Path(a.file).write_bytes(base64.b64decode(t.call("Page.captureScreenshot", format="png")["data"]))
-        print(a.file)
-    elif a.cmd == "click":
-        t.mouse("mouseMoved", a.x, a.y)
-        t.mouse("mousePressed", a.x, a.y, button="left", clickCount=1)
-        t.mouse("mouseReleased", a.x, a.y, button="left", clickCount=1)
-    elif a.cmd == "type":
-        t.call("Input.insertText", text=a.text)
-    elif a.cmd == "key":
-        for n in a.names:
-            t.press(n)
-    elif a.cmd == "scroll":
-        x, y = t.js("[innerWidth/2, innerHeight/2]")
-        t.mouse("mouseWheel", x, y, deltaX=0, deltaY=(-400 if a.direction == "up" else 400) * a.n)
+    TAB_COMMANDS[a.cmd](Tab(a.tab), a)
 
 
 if __name__ == "__main__":

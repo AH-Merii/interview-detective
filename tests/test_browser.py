@@ -5,6 +5,7 @@ Chromium is faked by a script on PATH and niri by a socket (support.FakeNiri); t
 faked in-process.
 """
 
+import argparse
 import json
 import os
 import subprocess
@@ -49,29 +50,38 @@ class FakeSocket:
 
 
 class DevToolsTest(unittest.TestCase):
+    def setUp(self):
+        self.ws = FakeSocket()
+        fake = mock.Mock(create_connection=mock.Mock(return_value=self.ws))
+        self.enterContext(mock.patch.dict(sys.modules, websocket=fake))
+
     def test_refuses_calls_that_raise_a_window_or_tab(self):
         self.assertLessEqual({"Page.bringToFront", "Target.activateTarget"}, browser.DENIED)
+        page = {"type": "page", "url": "https://example.com", "webSocketDebuggerUrl": "ws://fake"}
+        with mock.patch.object(browser, "tabs", return_value=[page]):
+            tab = browser.Tab()
         for method in sorted(browser.DENIED):
             with self.subTest(method=method):
-                tab = browser.Tab.__new__(browser.Tab)
-                tab.ws, tab.n = FakeSocket(), 0
                 with self.assertRaises(SystemExit) as e:
                     tab.call(method)
                 self.assertIn("focus", str(e.exception))
-                self.assertEqual(tab.ws.sent, [])
+                self.assertEqual(self.ws.sent, [])
 
     def test_new_tabs_open_in_the_background(self):
-        ws = FakeSocket()
-        fake = mock.Mock(create_connection=mock.Mock(return_value=ws))
-        with (
-            mock.patch.dict(sys.modules, websocket=fake),
-            mock.patch.object(browser, "api", return_value={"webSocketDebuggerUrl": "ws://fake"}),
-        ):
+        ws = self.ws
+        with mock.patch.object(browser, "api", return_value={"webSocketDebuggerUrl": "ws://fake"}):
             browser.new_tab("https://example.com")
         self.assertEqual(
             ws.sent,
             [{"id": 1, "method": "Target.createTarget", "params": {"url": "https://example.com", "background": True}}],
         )
+
+
+class CommandsTest(unittest.TestCase):
+    def test_every_command_has_a_handler(self):
+        sub = next(a for a in browser.parser()._actions if isinstance(a, argparse._SubParsersAction))
+        self.assertIn("click", sub.choices)
+        self.assertEqual(set(sub.choices) - set(browser.TAB_COMMANDS), {"start", "stop", "tabs", "open"})
 
 
 class LaunchTest(unittest.TestCase):
@@ -92,7 +102,12 @@ class LaunchTest(unittest.TestCase):
 
     def browser(self, *args):
         return subprocess.run(
-            [sys.executable, ROOT / "tools/browser.py", *args], env=self.env, capture_output=True, text=True, timeout=30
+            [sys.executable, ROOT / "tools/browser.py", *args],
+            env=self.env,
+            capture_output=True,
+            text=True,
+            timeout=30,
+            check=False,
         )
 
     def test_starts_unable_to_claim_focus_on_its_own_profile(self):
@@ -115,7 +130,7 @@ class LaunchTest(unittest.TestCase):
                 os.kill(pid, 0)
             except ProcessLookupError:
                 break
-            if open(f"/proc/{pid}/stat").read().split()[2] == "Z":
+            if Path(f"/proc/{pid}/stat").read_text().split()[2] == "Z":
                 break  # exited; the test's reaper just hasn't collected it
             time.sleep(0.1)
         else:

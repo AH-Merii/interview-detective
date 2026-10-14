@@ -22,7 +22,9 @@ class NewCaseTest(unittest.TestCase):
         self.repo = scratch_repo(self)
 
     def new_case(self, *args):
-        return subprocess.run(["bash", self.repo / "tools/new_case.sh", *args], capture_output=True, text=True)
+        return subprocess.run(
+            ["bash", self.repo / "tools/new_case.sh", *args], capture_output=True, text=True, check=False
+        )
 
     def intake(self, slug):
         return (self.repo / "interviews" / slug / "01_intake/intake.md").read_text()

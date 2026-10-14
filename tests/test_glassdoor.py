@@ -163,21 +163,22 @@ class ScrapeTest(unittest.TestCase):
         self.assertIn("ask the user", str(e.exception.code))
 
 
-class NormalizeTest(unittest.TestCase):
-    SCOPE = {
-        "company": "Acme",
-        "urls": [BASE],
-        "groups": {
-            "A": {"priority": "high", "roles": ["Machine Learning Engineer"]},
-            "B": {"priority": "medium", "roles": ["Data Scientist"]},
-            "C": {"priority": "low", "default": True},
-        },
-    }
+SCOPE = {
+    "company": "Acme",
+    "urls": [BASE],
+    "groups": {
+        "A": {"priority": "high", "roles": ["Machine Learning Engineer"]},
+        "B": {"priority": "medium", "roles": ["Data Scientist"]},
+        "C": {"priority": "low", "default": True},
+    },
+}
 
+
+class NormalizeTest(unittest.TestCase):
     def normalize(self, raw):
         tmp = Path(self.enterContext(tempfile.TemporaryDirectory()))
         (tmp / "raw.json").write_text(json.dumps(raw))
-        (tmp / "scope.json").write_text(json.dumps(self.SCOPE))
+        (tmp / "scope.json").write_text(json.dumps(SCOPE))
         with contextlib.redirect_stdout(io.StringIO()):
             glassdoor.normalize(tmp / "raw.json", tmp / "scope.json", tmp / "out.json")
         return json.loads((tmp / "out.json").read_text())

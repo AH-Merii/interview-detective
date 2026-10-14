@@ -14,7 +14,10 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 STAGES = [
-    ("01", lambda c: re.search(r"^confirmed:\s*true", (c / "01_intake/intake.md").read_text(), re.MULTILINE) is not None),
+    (
+        "01",
+        lambda c: re.search(r"^confirmed:\s*true", (c / "01_intake/intake.md").read_text(), re.MULTILINE) is not None,
+    ),
     ("02", lambda c: (c / "02_research/findings.md").exists()),
     ("03", lambda c: (c / "03_glassdoor/interviews.json").exists() or (c / "03_glassdoor/skipped.md").exists()),
     ("04", lambda c: (c / "04_question-check/question-bank.md").exists()),

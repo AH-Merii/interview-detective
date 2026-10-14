@@ -175,6 +175,10 @@ def roles(path):
         print(f"{g}\t{n}\t{role}")
 
 
+def tally(rows, key):
+    return ", ".join(f"{v} {n}" for v, n in Counter(r[key] for r in rows).most_common())
+
+
 def summary(path, outdir):
     d = json.loads(Path(path).read_text())
     rows, out = d["interviews"], Path(outdir)
@@ -189,15 +193,14 @@ def summary(path, outdir):
     ]
     for g in sorted({r["group"] for r in rows}):
         sel = [r for r in rows if r["group"] == g]
-        c = lambda k: ", ".join(f"{v} {n}" for v, n in Counter(r[k] for r in sel).most_common())
         stats += [
             f"## Group {g} ({sel[0]['priority']} priority): {len(sel)} interviews",
             "",
             f"- Roles: {', '.join(f'{v} ({n})' for v, n in Counter(r['role'] for r in sel).most_common())}",
-            f"- Outcome: {c('outcome')}",
-            f"- Experience: {c('experience')}",
-            f"- Difficulty: {c('difficulty')}",
-            f"- How obtained: {c('how_obtained')}",
+            f"- Outcome: {tally(sel, 'outcome')}",
+            f"- Experience: {tally(sel, 'experience')}",
+            f"- Difficulty: {tally(sel, 'difficulty')}",
+            f"- How obtained: {tally(sel, 'how_obtained')}",
             f"- Reviews dated {min(r['review_date'] for r in sel)} to {max(r['review_date'] for r in sel)}",
             f"- Questions reported: {sum(len(r['questions']) for r in sel)}",
             "",
