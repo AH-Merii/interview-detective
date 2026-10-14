@@ -10,5 +10,7 @@ slug="$(kebab "$1")-$(kebab "$2")-${3:-$(date +%Y-%m)}"
 cp -r _templates/interview "interviews/$slug"
 # git keeps no empty folders, so a clone's template lacks the empty stage folders
 mkdir -p "interviews/$slug"/{01_intake,02_research/lanes,03_glassdoor,04_question-check/batches,05_report}
-sed -i "s/^company:.*/company: $1/; s/^role:.*/role: $2/; s/^opened:.*/opened: $(date +%F)/" "interviews/$slug/01_intake/intake.md"
+# names like "AT&T" or "R/GA" go in literally: escape what sed reads in a replacement
+lit() { printf '%s' "$1" | sed 's/[\\/&]/\\&/g'; }
+sed -i "s/^company:.*/company: $(lit "$1")/; s/^role:.*/role: $(lit "$2")/; s/^opened:.*/opened: $(date +%F)/" "interviews/$slug/01_intake/intake.md"
 echo "interviews/$slug"
