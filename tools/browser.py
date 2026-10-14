@@ -31,7 +31,18 @@ Run with: uv run tools/browser.py COMMAND ...
 
 TAB is a tab index from `tabs` or a substring of its url; default: the first tab.
 """
-import argparse, base64, json, os, shutil, signal, socket, subprocess, sys, time, urllib.request
+
+import argparse
+import base64
+import json
+import os
+import shutil
+import signal
+import socket
+import subprocess
+import sys
+import time
+import urllib.request
 from pathlib import Path
 
 APP_ID = os.environ.get("ID_APP_ID", "dev.claude.lab")
@@ -39,20 +50,28 @@ HOME = Path(os.environ.get("ID_BROWSER_HOME", Path.home() / ".cache/interview-de
 PROFILE, STATE, DOWNLOADS = HOME / "profile", HOME / "state.json", HOME / "downloads"
 FLAGS = [
     "--remote-debugging-port=0",  # a free port, written to DevToolsActivePort in the profile
-    "--no-first-run", "--no-default-browser-check",
+    "--no-first-run",
+    "--no-default-browser-check",
     "--password-store=basic",  # never the user's keyring
-    "--deny-permission-prompts", "--disable-notifications",
+    "--deny-permission-prompts",
+    "--disable-notifications",
     # keep background tabs and a covered window rendering, so agents can read and screenshot them
-    "--disable-background-timer-throttling", "--disable-renderer-backgrounding",
+    "--disable-background-timer-throttling",
+    "--disable-renderer-backgrounding",
     "--disable-backgrounding-occluded-windows",
 ]
 WORKSPACE = os.environ.get("ID_WORKSPACE", "interview-detective")
 # Methods that would raise the window or tab and take the user's focus.
 DENIED = {"Page.bringToFront", "Target.activateTarget"}
 KEYS = {
-    "enter": ("Enter", 13, "\r"), "tab": ("Tab", 9, ""), "esc": ("Escape", 27, ""),
-    "backspace": ("Backspace", 8, ""), "up": ("ArrowUp", 38, ""), "down": ("ArrowDown", 40, ""),
-    "pgup": ("PageUp", 33, ""), "pgdn": ("PageDown", 34, ""),
+    "enter": ("Enter", 13, "\r"),
+    "tab": ("Tab", 9, ""),
+    "esc": ("Escape", 27, ""),
+    "backspace": ("Backspace", 8, ""),
+    "up": ("ArrowUp", 38, ""),
+    "down": ("ArrowDown", 40, ""),
+    "pgup": ("PageUp", 33, ""),
+    "pgdn": ("PageDown", 34, ""),
 }
 
 
@@ -198,7 +217,13 @@ def gather(pgid):
     for w in our_windows(pgid):
         ws_id, new = workspace()
         if w["workspace_id"] != ws_id:
-            niri({"Action": {"MoveWindowToWorkspace": {"window_id": w["id"], "reference": {"Id": ws_id}, "focus": False}}})
+            niri(
+                {
+                    "Action": {
+                        "MoveWindowToWorkspace": {"window_id": w["id"], "reference": {"Id": ws_id}, "focus": False}
+                    }
+                }
+            )
             moved += 1
         if new:  # name it after moving: a window landing on the last workspace makes niri append a new empty one
             niri({"Action": {"SetWorkspaceName": {"name": WORKSPACE, "workspace": {"Id": ws_id}}}})
@@ -237,8 +262,13 @@ def start(urls):
     (PROFILE / "DevToolsActivePort").unlink(missing_ok=True)
     log = open(HOME / "chromium.log", "w")
     env = {k: v for k, v in os.environ.items() if k not in ("XDG_ACTIVATION_TOKEN", "DESKTOP_STARTUP_ID")}
-    proc = subprocess.Popen(["chromium", f"--class={APP_ID}", f"--user-data-dir={PROFILE}", *FLAGS, *(urls or ["about:blank"])],
-                            stdout=log, stderr=log, env=env, start_new_session=True)
+    proc = subprocess.Popen(
+        ["chromium", f"--class={APP_ID}", f"--user-data-dir={PROFILE}", *FLAGS, *(urls or ["about:blank"])],
+        stdout=log,
+        stderr=log,
+        env=env,
+        start_new_session=True,
+    )
     for _ in range(100):
         try:
             p = int((PROFILE / "DevToolsActivePort").read_text().split()[0])
@@ -285,10 +315,14 @@ def main():
     tabbed("js").add_argument("expr")
     tabbed("goto").add_argument("url")
     tabbed("shot").add_argument("file")
-    c = tabbed("click"); c.add_argument("x", type=float); c.add_argument("y", type=float)
+    c = tabbed("click")
+    c.add_argument("x", type=float)
+    c.add_argument("y", type=float)
     tabbed("type").add_argument("text")
     tabbed("key").add_argument("names", nargs="+")
-    s = tabbed("scroll"); s.add_argument("direction", choices=["up", "down"]); s.add_argument("n", type=int, nargs="?", default=1)
+    s = tabbed("scroll")
+    s.add_argument("direction", choices=["up", "down"])
+    s.add_argument("n", type=int, nargs="?", default=1)
     a = p.parse_args()
 
     if a.cmd == "start":

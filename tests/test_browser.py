@@ -15,8 +15,9 @@ import unittest
 from pathlib import Path
 from unittest import mock
 
-from support import ROOT, FakeNiri
+from support import ROOT, FakeNiri  # first: it puts tools/ on sys.path
 
+# isort: split
 import browser
 
 FAKE_CHROMIUM = """#!/usr/bin/env python3
@@ -62,11 +63,15 @@ class DevToolsTest(unittest.TestCase):
     def test_new_tabs_open_in_the_background(self):
         ws = FakeSocket()
         fake = mock.Mock(create_connection=mock.Mock(return_value=ws))
-        with mock.patch.dict(sys.modules, websocket=fake), \
-                mock.patch.object(browser, "api", return_value={"webSocketDebuggerUrl": "ws://fake"}):
+        with (
+            mock.patch.dict(sys.modules, websocket=fake),
+            mock.patch.object(browser, "api", return_value={"webSocketDebuggerUrl": "ws://fake"}),
+        ):
             browser.new_tab("https://example.com")
-        self.assertEqual(ws.sent, [{"id": 1, "method": "Target.createTarget",
-                                    "params": {"url": "https://example.com", "background": True}}])
+        self.assertEqual(
+            ws.sent,
+            [{"id": 1, "method": "Target.createTarget", "params": {"url": "https://example.com", "background": True}}],
+        )
 
 
 class LaunchTest(unittest.TestCase):
@@ -76,14 +81,19 @@ class LaunchTest(unittest.TestCase):
         (self.tmp / "bin/chromium").write_text(FAKE_CHROMIUM)
         (self.tmp / "bin/chromium").chmod(0o755)
         env = {k: v for k, v in os.environ.items() if k != "NIRI_SOCKET"}
-        self.env = env | {"PATH": f"{self.tmp / 'bin'}:{env['PATH']}", "ID_BROWSER_HOME": str(self.tmp / "home"),
-                          "FAKE_LOG": str(self.tmp / "launch.json"),
-                          "XDG_ACTIVATION_TOKEN": "token", "DESKTOP_STARTUP_ID": "startup"}
+        self.env = env | {
+            "PATH": f"{self.tmp / 'bin'}:{env['PATH']}",
+            "ID_BROWSER_HOME": str(self.tmp / "home"),
+            "FAKE_LOG": str(self.tmp / "launch.json"),
+            "XDG_ACTIVATION_TOKEN": "token",
+            "DESKTOP_STARTUP_ID": "startup",
+        }
         self.addCleanup(self.browser, "stop")
 
     def browser(self, *args):
-        return subprocess.run([sys.executable, ROOT / "tools/browser.py", *args], env=self.env,
-                              capture_output=True, text=True, timeout=30)
+        return subprocess.run(
+            [sys.executable, ROOT / "tools/browser.py", *args], env=self.env, capture_output=True, text=True, timeout=30
+        )
 
     def test_starts_unable_to_claim_focus_on_its_own_profile(self):
         r = self.browser("start", "https://example.com")
@@ -142,10 +152,20 @@ class GatherTest(unittest.TestCase):
 
     def test_moves_our_windows_to_a_new_workspace_on_the_focused_output(self):
         fake = self.niri(
-            [self.window(1, 10), self.window(2, 20), self.window(3, 10, app="firefox"),
-             self.window(4, 10, pid=self.other_pid)],
-            [self.ws(10, 1), self.ws(20, 2), self.ws(30, 3), self.ws(40, 1, output="HDMI-A-1"),
-             self.ws(41, 2, output="HDMI-A-1")])
+            [
+                self.window(1, 10),
+                self.window(2, 20),
+                self.window(3, 10, app="firefox"),
+                self.window(4, 10, pid=self.other_pid),
+            ],
+            [
+                self.ws(10, 1),
+                self.ws(20, 2),
+                self.ws(30, 3),
+                self.ws(40, 1, output="HDMI-A-1"),
+                self.ws(41, 2, output="HDMI-A-1"),
+            ],
+        )
         self.assertEqual(browser.gather(self.pgid), 2)
         moves = self.moves(fake)
         self.assertEqual(set(moves), {1, 2})
@@ -157,8 +177,10 @@ class GatherTest(unittest.TestCase):
         self.assertGreater(names[0], 0, "named after a window moves there, or niri appends another empty one")
 
     def test_pulls_a_popup_back_to_the_named_workspace(self):
-        fake = self.niri([self.window(1, 30), self.window(2, 10)],
-                         [self.ws(10, 1), self.ws(30, 2, name="interview-detective"), self.ws(31, 3)])
+        fake = self.niri(
+            [self.window(1, 30), self.window(2, 10)],
+            [self.ws(10, 1), self.ws(30, 2, name="interview-detective"), self.ws(31, 3)],
+        )
         self.assertEqual(browser.gather(self.pgid), 1)
         self.assertEqual(self.moves(fake)[2]["reference"], {"Id": 30})
         self.assertNotIn("SetWorkspaceName", [name for name, _ in fake.actions])

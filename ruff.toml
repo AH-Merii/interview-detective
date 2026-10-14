@@ -1,0 +1,5 @@
+# Rules: ruff's default set for the pinned version (mise-tasks/check/lint), as in AH-Merii/claude-plugins.
+line-length = 120
+
+[lint.mccabe]
+max-complexity = 10

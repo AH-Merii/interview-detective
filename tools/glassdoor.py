@@ -17,12 +17,17 @@ Run with: uv run tools/glassdoor.py COMMAND ...
 Glassdoor builds each interviews page with its records embedded in the Next.js payload
 ("interviews":[...] beside "filteredInterviewCount"), so nothing is scraped from the rendered text.
 """
-import json, random, re, sys, time
+
+import json
+import random
+import re
+import sys
+import time
 from collections import Counter
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent))
-from browser import Tab  # noqa: E402
+from browser import Tab
 
 DEC = json.JSONDecoder()
 
@@ -31,7 +36,7 @@ def payload(tab):
     """(interviews on this page, filteredInterviewCount) from the page's embedded data, or (None, None)."""
     pushes = tab.js('[...document.scripts].map(s=>s.textContent).filter(t=>t.startsWith("self.__next_f.push"))')
     for p in pushes or []:
-        m = re.match(r"self\.__next_f\.push\(\[1,(.*)\]\)\s*$", p, re.S)
+        m = re.match(r"self\.__next_f\.push\(\[1,(.*)\]\)\s*$", p, re.DOTALL)
         if not m:
             continue
         s = json.loads(m.group(1))
@@ -52,8 +57,10 @@ def load(tab, url):
             return items, count
         time.sleep(1)
     title = tab.js("document.title")
-    sys.exit(f"no interview data at {url} (page title: {title!r}). "
-             "If it is a Cloudflare check or a login wall, ask the user to clear it in the browser, then rerun.")
+    sys.exit(
+        f"no interview data at {url} (page title: {title!r}). "
+        "If it is a Cloudflare check or a login wall, ask the user to clear it in the browser, then rerun."
+    )
 
 
 def next_url(tab, page):
@@ -66,8 +73,18 @@ def probe(url):
     tab = Tab("glassdoor")
     items, count = load(tab, url)
     per = len(items) or 1
-    print(json.dumps({"url": url, "interviews": count, "per_page": per, "pages": count and -(-count // per),
-                      "roles_on_page_1": Counter((i.get("jobTitle") or {}).get("text") for i in items)}, indent=1))
+    print(
+        json.dumps(
+            {
+                "url": url,
+                "interviews": count,
+                "per_page": per,
+                "pages": count and -(-count // per),
+                "roles_on_page_1": Counter((i.get("jobTitle") or {}).get("text") for i in items),
+            },
+            indent=1,
+        )
+    )
 
 
 def scrape(out, urls):
@@ -111,23 +128,44 @@ def normalize(raw, scope, out):
     for r in sorted(json.loads(Path(raw).read_text()), key=lambda r: r["reviewDateTime"], reverse=True):
         role = (r.get("jobTitle") or {}).get("text")
         g, prio = group(role)
-        rows.append({
-            "id": r["id"], "role": role, "group": g, "priority": prio,
-            "location": (r.get("location") or {}).get("name"),
-            "review_date": r["reviewDateTime"][:10],
-            "interview_date": r["interviewDateTime"][:7] if r.get("interviewDateTime") else None,
-            "outcome": lc(r.get("outcome")), "experience": lc(r.get("experience")),
-            "difficulty": lc(r.get("difficulty")), "how_obtained": lc(r.get("source")),
-            "duration_days": r.get("durationDays"), "process": r.get("processDescription"),
-            "questions": [q["question"] for q in r.get("userQuestions") or []],
-            "helpful": r.get("countHelpful"),
-            "employer_responses": [e.get("response") or e for e in r.get("employerResponses") or []],
-        })
+        rows.append(
+            {
+                "id": r["id"],
+                "role": role,
+                "group": g,
+                "priority": prio,
+                "location": (r.get("location") or {}).get("name"),
+                "review_date": r["reviewDateTime"][:10],
+                "interview_date": r["interviewDateTime"][:7] if r.get("interviewDateTime") else None,
+                "outcome": lc(r.get("outcome")),
+                "experience": lc(r.get("experience")),
+                "difficulty": lc(r.get("difficulty")),
+                "how_obtained": lc(r.get("source")),
+                "duration_days": r.get("durationDays"),
+                "process": r.get("processDescription"),
+                "questions": [q["question"] for q in r.get("userQuestions") or []],
+                "helpful": r.get("countHelpful"),
+                "employer_responses": [e.get("response") or e for e in r.get("employerResponses") or []],
+            }
+        )
     meta = json.loads(Path(scope).read_text())
-    Path(out).write_text(json.dumps({
-        "company": meta.get("company"), "source": meta.get("urls"), "scraped": time.strftime("%Y-%m-%d"),
-        "count": len(rows), "interviews": rows}, indent=2, ensure_ascii=False))
-    print(f"{len(rows)} interviews -> {out}: " + ", ".join(f"{g} {n}" for g, n in sorted(Counter(r['group'] for r in rows).items())))
+    Path(out).write_text(
+        json.dumps(
+            {
+                "company": meta.get("company"),
+                "source": meta.get("urls"),
+                "scraped": time.strftime("%Y-%m-%d"),
+                "count": len(rows),
+                "interviews": rows,
+            },
+            indent=2,
+            ensure_ascii=False,
+        )
+    )
+    print(
+        f"{len(rows)} interviews -> {out}: "
+        + ", ".join(f"{g} {n}" for g, n in sorted(Counter(r["group"] for r in rows).items()))
+    )
 
 
 def roles(path):
@@ -141,17 +179,28 @@ def summary(path, outdir):
     rows, out = d["interviews"], Path(outdir)
     head = f"Generated by `tools/glassdoor.py summary` from `interviews.json` ({d['count']} interviews, scraped {d['scraped']}). Do not edit; edit scope.json and rerun."
     stats = [f"# Glassdoor stats: {d['company']}", "", head, ""]
-    procs = [f"# Glassdoor processes and questions: {d['company']}, groups A and B", "", head,
-             "Group C stays in interviews.json; query it with jq.", ""]
+    procs = [
+        f"# Glassdoor processes and questions: {d['company']}, groups A and B",
+        "",
+        head,
+        "Group C stays in interviews.json; query it with jq.",
+        "",
+    ]
     for g in sorted({r["group"] for r in rows}):
         sel = [r for r in rows if r["group"] == g]
         c = lambda k: ", ".join(f"{v} {n}" for v, n in Counter(r[k] for r in sel).most_common())
-        stats += [f"## Group {g} ({sel[0]['priority']} priority): {len(sel)} interviews", "",
-                  f"- Roles: {', '.join(f'{v} ({n})' for v, n in Counter(r['role'] for r in sel).most_common())}",
-                  f"- Outcome: {c('outcome')}", f"- Experience: {c('experience')}", f"- Difficulty: {c('difficulty')}",
-                  f"- How obtained: {c('how_obtained')}",
-                  f"- Reviews dated {min(r['review_date'] for r in sel)} to {max(r['review_date'] for r in sel)}",
-                  f"- Questions reported: {sum(len(r['questions']) for r in sel)}", ""]
+        stats += [
+            f"## Group {g} ({sel[0]['priority']} priority): {len(sel)} interviews",
+            "",
+            f"- Roles: {', '.join(f'{v} ({n})' for v, n in Counter(r['role'] for r in sel).most_common())}",
+            f"- Outcome: {c('outcome')}",
+            f"- Experience: {c('experience')}",
+            f"- Difficulty: {c('difficulty')}",
+            f"- How obtained: {c('how_obtained')}",
+            f"- Reviews dated {min(r['review_date'] for r in sel)} to {max(r['review_date'] for r in sel)}",
+            f"- Questions reported: {sum(len(r['questions']) for r in sel)}",
+            "",
+        ]
         if g == "C":
             continue
         procs += [f"## Group {g}", ""]
@@ -169,8 +218,13 @@ def summary(path, outdir):
 
 def main():
     cmd, *args = sys.argv[1:] or ["-h"]
-    fns = {"probe": (probe, 1), "scrape": (lambda o, *u: scrape(o, u), 2), "normalize": (normalize, 3),
-           "roles": (roles, 1), "summary": (summary, 2)}
+    fns = {
+        "probe": (probe, 1),
+        "scrape": (lambda o, *u: scrape(o, u), 2),
+        "normalize": (normalize, 3),
+        "roles": (roles, 1),
+        "summary": (summary, 2),
+    }
     if cmd not in fns or len(args) < fns[cmd][1]:
         sys.exit(__doc__)
     fns[cmd][0](*args)

@@ -25,8 +25,10 @@ class LiveGlassdoorTest(unittest.TestCase):
         self.assertTrue(items)
         for field in ("id", "jobTitle", "reviewDateTime", "outcome", "difficulty", "userQuestions"):
             self.assertIn(field, items[0])
-        self.assertTrue(glassdoor.next_url(glassdoor.Tab("glassdoor"), 2) or count <= len(items),
-                        "more reviews than one page, but no link to page 2")
+        self.assertTrue(
+            glassdoor.next_url(glassdoor.Tab("glassdoor"), 2) or count <= len(items),
+            "more reviews than one page, but no link to page 2",
+        )
 
 
 if __name__ == "__main__":

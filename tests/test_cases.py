@@ -9,8 +9,12 @@ import unittest
 from support import scratch_repo
 
 # Each stage's output, from the pipeline table in CONTEXT.md. 01 is done by confirming intake.md instead.
-OUTPUTS = {"02": "02_research/findings.md", "03": "03_glassdoor/interviews.json",
-           "04": "04_question-check/question-bank.md", "05": "05_report/report.md"}
+OUTPUTS = {
+    "02": "02_research/findings.md",
+    "03": "03_glassdoor/interviews.json",
+    "04": "04_question-check/question-bank.md",
+    "05": "05_report/report.md",
+}
 
 
 class NewCaseTest(unittest.TestCase):
@@ -36,8 +40,12 @@ class NewCaseTest(unittest.TestCase):
         self.assertRegex(intake, r"(?m)^confirmed: false$")
 
     def test_writes_company_and_role_into_intake_exactly_as_given(self):
-        for company, role in [("Acme", "ML Engineer"), ("AT&T", "R&D Engineer"), ("R/GA", "ML/AI Engineer"),
-                              ("Back\\slash", "C++ | Rust")]:
+        for company, role in [
+            ("Acme", "ML Engineer"),
+            ("AT&T", "R&D Engineer"),
+            ("R/GA", "ML/AI Engineer"),
+            ("Back\\slash", "C++ | Rust"),
+        ]:
             with self.subTest(company=company, role=role):
                 r = self.new_case(company, role, "2026-11")
                 self.assertEqual(r.returncode, 0, r.stderr)
@@ -64,8 +72,12 @@ class NewCaseTest(unittest.TestCase):
 class StatusTest(unittest.TestCase):
     def setUp(self):
         self.repo = scratch_repo(self)
-        out = subprocess.run(["bash", self.repo / "tools/new_case.sh", "Acme", "ML Engineer", "2026-11"],
-                             capture_output=True, text=True, check=True).stdout.strip()
+        out = subprocess.run(
+            ["bash", self.repo / "tools/new_case.sh", "Acme", "ML Engineer", "2026-11"],
+            capture_output=True,
+            text=True,
+            check=True,
+        ).stdout.strip()
         self.case = self.repo / out
         (self.repo / "interviews/CONTEXT.md").write_text("not a case")
 

@@ -56,7 +56,7 @@ class FakeNiri:
             return {"Ok": {"Workspaces": self.workspaces}}
         if req == "FocusedOutput":
             return {"Ok": {"FocusedOutput": {"name": self.output}}}
-        (name, args), = req["Action"].items()
+        ((name, args),) = req["Action"].items()
         self.actions.append((name, args))
         if name == "MoveWindowToWorkspace":
             next(w for w in self.windows if w["id"] == args["window_id"])["workspace_id"] = args["reference"]["Id"]
