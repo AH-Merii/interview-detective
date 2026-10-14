@@ -58,14 +58,15 @@ def load(tab, url):
 
 def next_url(tab, page):
     """The link to page `page` (Glassdoor's _P<n> form), from the page itself."""
-    return tab.js(f'[...document.querySelectorAll("a[href]")].map(a=>a.href).find(h=>/_P{page}\\.htm/.test(h)) || null')
+    hrefs = tab.js('[...document.querySelectorAll("a[href]")].map(a=>a.href)') or []
+    return next((h for h in hrefs if re.search(rf"_P{page}\.htm", h)), None)
 
 
 def probe(url):
     tab = Tab("glassdoor")
     items, count = load(tab, url)
     per = len(items) or 1
-    print(json.dumps({"url": url, "interviews": count, "per_page": per, "pages": -(-count // per),
+    print(json.dumps({"url": url, "interviews": count, "per_page": per, "pages": count and -(-count // per),
                       "roles_on_page_1": Counter((i.get("jobTitle") or {}).get("text") for i in items)}, indent=1))
 
 
@@ -82,7 +83,7 @@ def scrape(out, urls):
                 found[it["id"]] = it
             got += len(items)
             print(f"  page {page}: {len(items)}")
-            if not items or got >= count:
+            if not items or (count is not None and got >= count):  # no count: read until no next page
                 break
             page += 1
             nxt = next_url(tab, page)
