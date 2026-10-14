@@ -39,11 +39,12 @@ jobs:
         uses: googleapis/release-please-action@45996ed1f6d02564a971a2fa1b5860e934307cf7 # v5.0.0
         with:
           token: ${{ steps.token.outputs.token }}
-      # Squash-merges once the main ruleset's required check (ci-ok) passes on it.
+      # Squash-merges once the main ruleset's required check (ci-ok) passes on it. Runs only when there is a release
+      # PR: the run that publishes a release has none, and `pr` is then empty.
       - name: Merge the release PR when CI passes
-        if: steps.release.outputs.prs_created == 'true'
+        if: steps.release.outputs.pr != ''
         env:
           GH_TOKEN: ${{ steps.token.outputs.token }}
-          PR: ${{ fromJSON(steps.release.outputs.pr).number }}
+          PR_JSON: ${{ steps.release.outputs.pr }}
           REPO: ${{ github.repository }}
-        run: gh pr merge "$PR" --repo "$REPO" --auto --squash
+        run: gh pr merge "$(jq -r .number <<<"$PR_JSON")" --repo "$REPO" --auto --squash
