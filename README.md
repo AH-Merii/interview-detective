@@ -14,15 +14,50 @@ investigates in parallel and hands back a sourced report with the questions you 
   company, with a link to practise on.
 - **Report**: summary, findings with sources and confidence, Glassdoor numbers, practice questions.
 
-## Use it
+## Get started
 
-In Claude Code, run `/interview-detective` or say you have an interview coming up. It asks what you
-know, then walks the pipeline, stopping for you to check each stage's output.
+You need [Claude Code](https://claude.com/claude-code), [uv](https://docs.astral.sh/uv/), Chromium,
+and the [`gh`](https://cli.github.com/) CLI, logged in.
 
-```bash
-tools/new_case.sh "Acme AI" "ML Engineer"   # start a case by hand
-uv run tools/status.py                       # every case and its next stage
-```
+1. Clone the repo and link its skill into your Claude config:
+
+   ```bash
+   git clone git@github.com:AH-Merii/interview-detective.git
+   cd interview-detective
+   ln -s "$PWD/skill" "${CLAUDE_CONFIG_DIR:-$HOME/.claude}/skills/interview-detective"
+   ```
+
+2. On [niri](https://github.com/YaLTeR/niri), add this window rule so the browser opens without taking
+   your focus. Without niri the browser still works; it opens wherever your compositor puts it.
+
+   ```kdl
+   window-rule {
+       match app-id=r#"^dev\.claude\.lab$"#
+       open-focused false
+   }
+   ```
+
+3. In Claude Code, from any folder, run `/interview-detective` or say you have an interview coming up.
+
+## What a run looks like
+
+1. **Intake.** It asks for the company, role and round, and what you already have: emails, a job post,
+   a take-home. It writes `interviews/<case>/01_intake/intake.md`; read it, fix anything wrong, and say
+   it's right.
+2. **Research and Glassdoor, at the same time.** Agents search GitHub and the web in the background.
+   A Chromium window opens on a new workspace called `interview-detective` on your current screen;
+   switch to it, log in to Glassdoor and clear any Cloudflare check, then tell Claude. If research hits
+   pages behind a captcha or login, they open as more tabs there for you to clear.
+3. **Question check.** Every reported question is matched to a standard problem, a variant, or marked
+   as specific to the company. Star (★) the ones you want the report to favour.
+4. **Report.** `interviews/<case>/05_report/report.md`: summary, findings with sources, Glassdoor
+   numbers and practice questions.
+
+It stops after each stage for you to read what it wrote, and the next stage reads your edits.
+`uv run tools/status.py` lists every case and its next stage, and saying "resume" picks one up.
+
+Your Glassdoor login stays in the browser's own profile, in `~/.cache/interview-detective/browser/`.
+`uv run tools/browser.py stop --forget` deletes it.
 
 ## How it works
 
@@ -37,26 +72,18 @@ carry the state, and each stage's contract says exactly what it reads and writes
 Each interview is a case folder under `interviews/`. Cases hold scraped reviews and notes on real
 people's public work, so `.gitignore` keeps them out of the repo.
 
-## Requirements
+## Develop
 
-- [Claude Code](https://claude.com/claude-code), [uv](https://docs.astral.sh/uv/), Chromium, and the
-  [`gh`](https://cli.github.com/) CLI, logged in.
-- [niri](https://github.com/YaLTeR/niri), for the browser's own unfocused workspace. The window rule
-  that keeps it unfocused matches app-id `dev.claude.lab`:
-
-  ```kdl
-  window-rule {
-      match app-id=r#"^dev\.claude\.lab$"#
-      open-focused false
-  }
-  ```
-
-  Without niri the browser still works; it just opens wherever your compositor puts it.
-
-## Install the skill
+Checks are [mise](https://mise.jdx.dev/) tasks, and CI runs the same ones (`.github/workflows/ci.yml`):
 
 ```bash
-ln -s "$PWD/skill" ~/.claude/skills/interview-detective
+mise run setup    # once after cloning: the pre-push secret scan
+mise run check    # every check: lint, types, tests with coverage, complexity, secrets, workflows
 ```
 
-Use your Claude config directory if it is not `~/.claude`.
+The tests run offline, with Chromium and niri faked (`python3 -m unittest discover -s tests`).
+`tests/test_live.py` checks the real Glassdoor; its docstring says how to run it.
+
+## License
+
+[MIT](LICENSE), copyright 2026 AH-Merii (AbdulHamid Merii).
