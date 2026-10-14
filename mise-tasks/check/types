@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+#MISE description="Type-check the tools and tests (ty)"
+#MISE tools={ty="0.0.86", python="3.14", uv="0.13.0"}
+# ty checks unannotated function bodies too, which matters here: the tools carry no
+# annotations. It checks against a scratch environment holding the tools' one
+# dependency (websocket-client, from their PEP 723 headers) and tools/ itself, the
+# way the tests import them.
+set -euo pipefail
+
+env=$(mktemp -d)
+trap 'rm -rf "$env"' EXIT
+uv venv -q --python 3.14 "$env"
+uv pip install -q --python "$env" websocket-client
+echo "$PWD/tools" >"$("$env/bin/python" -c 'import sysconfig; print(sysconfig.get_path("purelib"))')/tools.pth"
+ty check --python "$env" --python-version 3.14 --error-on-warning .

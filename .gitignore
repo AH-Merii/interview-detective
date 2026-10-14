@@ -4,3 +4,17 @@ _index/log.md
 
 __pycache__/
 .venv/
+
+# Secret files, so they can't be committed by accident (as in claude-plugins).
+.env*
+!.env.example
+*.pem
+*.key
+*.p12
+id_rsa
+id_dsa
+id_ecdsa
+id_ed25519
+credentials*.json
+*.secret*
+.claude/settings.local.json

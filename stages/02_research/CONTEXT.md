@@ -1,0 +1,38 @@
+# 02_research — parallel detective lanes
+
+One job: find public evidence of what this interview will hold, one lane per kind of source, then
+merge it into `findings.md`.
+
+## Inputs
+- Working (this run): `<case>/01_intake/intake.md`
+- Reference: `references/lanes/*.md` (one brief per lane), `references/lane-output.md`
+- Reference: `../../_shared/agent-tiers.md`, `../../_shared/evidence.md`, `../../_shared/browser.md`
+
+Do NOT load: `03_glassdoor` outputs (that stage runs beside this one), other cases.
+
+## Process
+1. Start one background agent per lane, all in the same turn, at the tier its brief names. Prompt each
+   with only: its brief's path, the intake path, `references/lane-output.md`, and its output path
+   `<case>/02_research/lanes/<lane>.md`.
+
+   | Lane | Brief | Tier |
+   |---|---|---|
+   | exercises | `references/lanes/exercises.md` | `sonnet` |
+   | company-github | `references/lanes/company-github.md` | `sonnet` |
+   | candidate-prep | `references/lanes/candidate-prep.md` | `sonnet` |
+   | people-github | `references/lanes/people-github.md` | `opus` |
+   | wildcard | `references/lanes/wildcard.md` | `opus` |
+
+2. While they run, work on `03_glassdoor` with the user.
+3. When the lanes are back, collect every `## Blocked` entry. Open them as tabs and have the user clear
+   them in one visit (`_shared/browser.md`), then send one `haiku` reader per site; each appends its
+   findings to the lane file that listed the page.
+4. Write `findings.md` from the lane files: merge duplicates, keep each finding's source and confidence,
+   order by how directly it speaks to this round. End with what was looked for and not found.
+
+## Outputs
+- `<case>/02_research/lanes/<lane>.md`, one per lane
+- `<case>/02_research/findings.md`
+
+## Human check
+The user reads `findings.md` and deletes or corrects wrong leads in place; 04 and 05 read what is left.

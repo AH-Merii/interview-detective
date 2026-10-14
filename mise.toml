@@ -1,0 +1,8 @@
+# Quality checks are file tasks in mise-tasks/check/, as in AH-Merii/claude-plugins; each declares its own
+# tools in its #MISE header, so adding a check never edits this file. Run one with `mise run check:<name>`,
+# or all of them with `mise run check`.
+min_version = "2026.10.6"
+
+[tasks.check]
+description = "Run every check CI runs"
+depends = ["check:*"]

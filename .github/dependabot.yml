@@ -1,0 +1,16 @@
+# Actions are the only pinned third-party code CI runs. Dependabot bumps the pinned SHAs and their `# vX.Y.Z` comments.
+version: 2
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    # A new release must age a week before Dependabot proposes it.
+    cooldown:
+      default-days: 7
+    groups:
+      actions:
+        patterns: ["*"]
+    # `ci:` titles, as the commits that touch CI use.
+    commit-message:
+      prefix: ci
