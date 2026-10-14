@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 200" role="img" aria-label="interview-detective">
+  <title>interview-detective: Commit Trail wordmark</title>
+  <rect width="640" height="200" rx="28" fill="#F8FAFC"/>
+  <g transform="translate(20 20) scale(0.625)">
+    <!-- the branch line: a git log the footprints walk along, one commit per step -->
+    <path d="M48 247 L131 147" fill="none" stroke="#8A94A6" stroke-width="7" stroke-linecap="round"/>
+    <g fill="#8A94A6">
+      <circle cx="56" cy="238" r="9"/>
+      <circle cx="91" cy="195.5" r="9"/>
+      <circle cx="126" cy="153" r="9"/>
+    </g>
+    <!-- footprints: forefoot + heel, alternating left/right of the branch -->
+    <g fill="#F25F3A">
+      <g transform="translate(36 221.5) rotate(39.4)">
+        <ellipse cx="0" cy="-9" rx="15" ry="20"/>
+        <circle cx="0" cy="22" r="11"/>
+      </g>
+      <g transform="translate(111 212) rotate(39.4)">
+        <ellipse cx="0" cy="-9" rx="15" ry="20"/>
+        <circle cx="0" cy="22" r="11"/>
+      </g>
+      <g transform="translate(106 136.5) rotate(39.4)">
+        <ellipse cx="0" cy="-9" rx="15" ry="20"/>
+        <circle cx="0" cy="22" r="11"/>
+      </g>
+    </g>
+    <!-- the destination: an interview question -->
+    <path d="M156 12 H228 Q246 12 246 30 V86 Q246 104 228 104 H174 L140 124 L152 99 Q140 94 140 84 V30 Q140 12 156 12 Z" fill="#2F6FED"/>
+    <path d="M176 46 Q176 29 193 29 Q210 29 210 45 Q210 57 193 62 L193 70" fill="none" stroke="#FFFFFF" stroke-width="13" stroke-linecap="round" stroke-linejoin="round"/>
+    <circle cx="193" cy="88" r="8" fill="#FFFFFF"/>
+  </g>
+  <g font-family="Inter, 'Helvetica Neue', Arial, sans-serif" font-weight="800" font-size="54">
+    <text x="204" y="94" fill="#1E293B">interview</text>
+    <text x="204" y="152" fill="#F25F3A">detective</text>
+  </g>
+</svg>

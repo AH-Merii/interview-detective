@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="256" height="256" role="img" aria-label="interview-detective: Stage Keyhole">
+  <defs>
+    <clipPath id="keyhole">
+      <circle cx="128" cy="96" r="56"/>
+      <polygon points="106,124 150,124 174,212 82,212"/>
+    </clipPath>
+  </defs>
+  <rect width="256" height="256" rx="48" fill="#111827"/>
+  <g clip-path="url(#keyhole)">
+    <rect x="0" y="40" width="256" height="28" fill="#38BDF8"/>
+    <rect x="0" y="76" width="256" height="28" fill="#60A5FA"/>
+    <rect x="0" y="112" width="256" height="28" fill="#818CF8"/>
+    <rect x="0" y="148" width="256" height="28" fill="#A78BFA"/>
+    <rect x="0" y="184" width="256" height="28" fill="#C084FC"/>
+  </g>
+</svg>

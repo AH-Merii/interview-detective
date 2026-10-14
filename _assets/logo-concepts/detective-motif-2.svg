@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" role="img" aria-label="interview-detective: Prompt Holmes">
+  <title>Prompt Holmes</title>
+  <defs>
+    <clipPath id="dome">
+      <path d="M62 116 C62 66 94 46 128 46 C162 46 194 66 194 116 Z"/>
+    </clipPath>
+  </defs>
+  <!-- terminal window -->
+  <rect x="38" y="106" width="180" height="122" rx="20" fill="#111827"/>
+  <path d="M78 150 L106 170 L78 190" fill="none" stroke="#4ADE80" stroke-width="15" stroke-linecap="round" stroke-linejoin="round"/>
+  <rect x="118" y="183" width="44" height="14" rx="4" fill="#4ADE80"/>
+  <!-- deerstalker crown with tweed check -->
+  <path d="M62 116 C62 66 94 46 128 46 C162 46 194 66 194 116 Z" fill="#9A6B43"/>
+  <g clip-path="url(#dome)" stroke="#6E4A2C" stroke-width="6">
+    <path d="M100 30 V120 M156 30 V120 M50 84 H210"/>
+  </g>
+  <!-- front and back peaks -->
+  <path d="M16 120 Q64 98 128 104 Q192 98 240 120 Q192 122 128 122 Q64 122 16 120 Z" fill="#7A5232"/>
+  <!-- ear-flap ties: bow on top -->
+  <g fill="#6E4A2C">
+    <ellipse cx="114" cy="42" rx="13" ry="7" transform="rotate(-20 114 42)"/>
+    <ellipse cx="142" cy="42" rx="13" ry="7" transform="rotate(20 142 42)"/>
+    <circle cx="128" cy="45" r="6"/>
+  </g>
+</svg>

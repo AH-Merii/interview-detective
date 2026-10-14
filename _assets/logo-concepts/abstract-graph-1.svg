@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="256" height="256" role="img" aria-label="interview-detective: Pinboard">
+  <rect width="256" height="256" rx="48" fill="#0B1220"/>
+  <g stroke="#475569" stroke-width="10" stroke-linecap="round">
+    <line x1="60" y1="76" x2="176" y2="52"/>
+    <line x1="60" y1="76" x2="84" y2="200"/>
+    <line x1="204" y1="172" x2="84" y2="200"/>
+  </g>
+  <g stroke="#F43F5E" stroke-width="10" stroke-linecap="round">
+    <line x1="60" y1="76" x2="132" y2="128"/>
+    <line x1="176" y1="52" x2="132" y2="128"/>
+    <line x1="204" y1="172" x2="132" y2="128"/>
+    <line x1="84" y1="200" x2="132" y2="128"/>
+  </g>
+  <g fill="#E2E8F0">
+    <circle cx="60" cy="76" r="18"/>
+    <circle cx="176" cy="52" r="18"/>
+    <circle cx="204" cy="172" r="18"/>
+    <circle cx="84" cy="200" r="18"/>
+  </g>
+  <circle cx="132" cy="128" r="28" fill="#F43F5E"/>
+  <circle cx="132" cy="128" r="11" fill="#0B1220"/>
+</svg>
