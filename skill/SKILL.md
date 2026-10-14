@@ -5,11 +5,12 @@ description: Prepare for a job interview by detective work. Asks what company, r
 
 # interview-detective
 
-The work lives in an ICM workspace at `~/Projects/interview-detective/`. This skill only routes there.
+The work lives in an ICM workspace: the repository this skill's folder belongs to. The skill folder is a
+symlink to the repo's `skill/`, so find the repo with `dirname "$(realpath <this skill's base directory>)"`.
+Run every tool from there.
 
-1. Read `~/Projects/interview-detective/CLAUDE.md` and follow its routing table. Run tools from that
-   directory.
+1. Read the repo's `CLAUDE.md` and follow its routing table.
 2. For a new interview, start at stage 01: ask for the company and role before anything else.
-3. To resume or report status, run `uv run tools/status.py` there.
+3. To resume or report status, run `uv run tools/status.py`.
 
 Every stage's contract is in `stages/NN_*/CONTEXT.md`; read only the one you are on.
