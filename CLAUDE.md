@@ -19,6 +19,7 @@ explaining, it goes in that folder's CONTEXT.md.
 | `tools/` | browser, Glassdoor scraper, new case, status |
 | `skill/` | the `/interview-detective` skill, which routes here |
 | `_assets/` | logo and logo concepts |
+| `tests/`, `mise-tasks/` | tests for `tools/`, and the checks CI runs; `mise run check` runs them all |
 
 ## Route by what just happened
 

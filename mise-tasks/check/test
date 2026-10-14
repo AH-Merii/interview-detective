@@ -1,0 +1,28 @@
+#!/usr/bin/env bash
+#MISE description="Run the tests under coverage, with a floor"
+#MISE tools={python="3.14", "pipx:coverage"="7.16.2"}
+# Offline: Chromium and niri are faked. Coverage follows subprocesses, since the
+# tests run the case tools and the browser as child processes; tests/ isn't measured.
+# The floor sits below the total because browser.py's per-tab commands need a real
+# Chromium; tests/test_live.py is the opt-in check against the real site.
+set -euo pipefail
+
+FAIL_UNDER=70
+work=$(mktemp -d)
+trap 'rm -rf "$work"' EXIT
+# Absolute paths: subprocesses run from other folders.
+cat >"$work/coveragerc" <<RC
+[run]
+patch = subprocess
+source = $PWD
+omit = */tests/*
+data_file = $work/coverage
+[report]
+fail_under = $FAIL_UNDER
+show_missing = true
+skip_covered = true
+RC
+export COVERAGE_RCFILE=$work/coveragerc
+coverage run -m unittest discover -s tests
+coverage combine --quiet
+coverage report

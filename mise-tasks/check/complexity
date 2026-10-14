@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+#MISE description="Fail any function over the complexity limit"
+#MISE tools={ruff="0.17.0"}
+# McCabe complexity (ruff C901). The limit is lint.mccabe.max-complexity in
+# ruff.toml. tests/ is exempt: fakes and table-driven tests don't ship.
+set -euo pipefail
+
+ruff check --no-cache --select C901 --extend-exclude tests .
