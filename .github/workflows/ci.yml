@@ -19,8 +19,8 @@ concurrency:
 # Modelled on AH-Merii/claude-plugins' CI.
 
 jobs:
-  lint:
-    name: Lint and format
+  validate:
+    name: Validate the plugin
     runs-on: ubuntu-24.04
     timeout-minutes: 10
     steps:
@@ -32,6 +32,15 @@ jobs:
         uses: jdx/mise-action@2d8d4cafcbd33be2ea37d2b6f5ad595363d1f1ca # v5.1.1
         with:
           version: 2026.10.6
+      - run: mise run check:validate
+
+  lint:
+    name: Lint and format
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - *checkout
+      - *mise
       - run: mise run check:lint
 
   types:
@@ -94,6 +103,7 @@ jobs:
     name: ci-ok
     if: always()
     needs:
+      - validate
       - lint
       - types
       - test
