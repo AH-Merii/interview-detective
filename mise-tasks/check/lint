@@ -7,6 +7,6 @@ set -euo pipefail
 rc=0
 ruff check --no-cache . || rc=1
 ruff format --check --no-cache . || rc=1
-mapfile -t scripts < <(grep -rlE '^#!/usr/bin/env bash' tools mise-tasks .githooks)
+mapfile -t scripts < <(grep -rlE '^#!/usr/bin/env bash' tools setup mise-tasks .githooks)
 shellcheck "${scripts[@]}" || rc=1
 exit "$rc"

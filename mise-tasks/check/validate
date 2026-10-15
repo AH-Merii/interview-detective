@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+#MISE description="Strictly validate the plugin manifest and its skills"
+#MISE tools={claude="2.1.289"}
+#MISE env={DISABLE_AUTOUPDATER="1"}
+# As in AH-Merii/claude-plugins' check:validate, for a repo that is one plugin.
+set -euo pipefail
+claude plugin validate --strict .

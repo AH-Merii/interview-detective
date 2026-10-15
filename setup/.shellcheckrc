@@ -1,0 +1,3 @@
+# wizard.sh's library (above its STAGES marker) is copied verbatim from the /wizard skill's template,
+# which defines colours some wizards never use.
+disable=SC2034

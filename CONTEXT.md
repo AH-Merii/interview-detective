@@ -2,7 +2,7 @@
 
 Ask what the user knows, investigate in parallel, check every question found, write the report.
 
-`<case>` is `interviews/<company>-<role>-<YYYY-MM>/`. Contracts live in `stages/NN_*/CONTEXT.md`;
+`<case>` is `<cases>/<company>-<role>-<YYYY-MM>/`, in the user's cases folder. Contracts live in `stages/NN_*/CONTEXT.md`;
 outputs land in `<case>/NN_*/`.
 
 | Stage | Job | Input | Output | Human check |
@@ -17,5 +17,5 @@ outputs land in `<case>/NN_*/`.
 work through 03 with the user (it needs their logins). Pages that 02's lanes find blocked are opened as
 extra tabs in the same browser, so the user clears everything in one visit.
 
-Factory (every run): `stages/`, `_shared/`, `tools/`. Product (each run): `interviews/<case>/`.
-Status is whatever exists: `uv run tools/status.py` (rules in its docstring).
+Factory (every run): `stages/`, `_shared/`, `tools/`. Product (each run): `<cases>/<case>/`.
+Status is whatever exists: `tools/status.py` (rules in its docstring).
