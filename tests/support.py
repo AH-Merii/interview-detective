@@ -4,7 +4,7 @@ Run the suite with: python3 -m unittest discover -s tests   (or: mise run check:
 """
 
 import json
-import shutil
+import os
 import socket
 import sys
 import tempfile
@@ -15,13 +15,16 @@ ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT / "tools"))
 
 
-def scratch_repo(test):
-    """A throwaway copy of what the case tools need (tools/, _templates/, interviews/), removed after the test."""
+def scratch_cases(test):
+    """A throwaway cases folder, and an environment that points the case tools at it (ID_CASES_DIR) and keeps
+    them off the user's own config and home (XDG_CONFIG_HOME, HOME). Both are removed after the test."""
     tmp = Path(test.enterContext(tempfile.TemporaryDirectory()))
-    for part in ("tools", "_templates"):
-        shutil.copytree(ROOT / part, tmp / part, ignore=shutil.ignore_patterns("__pycache__"))
-    (tmp / "interviews").mkdir()
-    return tmp
+    env = {k: v for k, v in os.environ.items() if k != "ID_CASES_DIR"}
+    return tmp / "cases", env | {
+        "ID_CASES_DIR": str(tmp / "cases"),
+        "XDG_CONFIG_HOME": str(tmp / "config"),
+        "HOME": str(tmp / "home"),
+    }
 
 
 class FakeNiri:

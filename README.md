@@ -17,32 +17,35 @@ investigates in parallel and hands back a sourced report with the questions you 
 ## Get started
 
 You need [Claude Code](https://claude.com/claude-code), [uv](https://docs.astral.sh/uv/), Chromium,
-and the [`gh`](https://cli.github.com/) CLI, logged in.
+and the [`gh`](https://cli.github.com/) CLI, logged in. The setup wizard checks for each.
 
-1. Clone the repo and link its skill into your Claude config:
+1. Install the plugin from the [ah-merii marketplace](https://github.com/AH-Merii/claude-plugins), in
+   Claude Code:
+
+   ```text
+   /plugin marketplace add AH-Merii/claude-plugins
+   /plugin install interview-detective@ah-merii
+   ```
+
+2. Run the setup wizard in a terminal. `/interview-detective:setup` prints the command with the
+   plugin's path filled in; it looks like this:
 
    ```bash
-   git clone git@github.com:AH-Merii/interview-detective.git
-   cd interview-detective
-   ln -s "$PWD/skill" "${CLAUDE_CONFIG_DIR:-$HOME/.claude}/skills/interview-detective"
+   bash ~/.claude/plugins/cache/ah-merii/interview-detective/<version>/setup/wizard.sh
    ```
 
-2. On [niri](https://github.com/YaLTeR/niri), add this window rule so the browser opens without taking
-   your focus. Without niri the browser still works; it opens wherever your compositor puts it.
+   It checks the requirements and asks where your cases should live (`~/interview-detective` by
+   default). On [niri](https://github.com/YaLTeR/niri) it checks for the window rule that keeps the
+   browser from taking your focus. Then it opens the browser once to check it, and offers a Glassdoor
+   login. Run it again any time to change your answers.
 
-   ```kdl
-   window-rule {
-       match app-id=r#"^dev\.claude\.lab$"#
-       open-focused false
-   }
-   ```
-
-3. In Claude Code, from any folder, run `/interview-detective` or say you have an interview coming up.
+3. In Claude Code, from any folder, run `/interview-detective:interview-detective` or say you have an
+   interview coming up.
 
 ## What a run looks like
 
 1. **Intake.** It asks for the company, role and round, and what you already have: emails, a job post,
-   a take-home. It writes `interviews/<case>/01_intake/intake.md`; read it, fix anything wrong, and say
+   a take-home. It writes `<case>/01_intake/intake.md` in your cases folder; read it, fix anything wrong, and say
    it's right.
 2. **Research and Glassdoor, at the same time.** Agents search GitHub and the web in the background.
    A Chromium window opens on a new workspace called `interview-detective` on your current screen;
@@ -50,14 +53,14 @@ and the [`gh`](https://cli.github.com/) CLI, logged in.
    pages behind a captcha or login, they open as more tabs there for you to clear.
 3. **Question check.** Every reported question is matched to a standard problem, a variant, or marked
    as specific to the company. Star (★) the ones you want the report to favour.
-4. **Report.** `interviews/<case>/05_report/report.md`: summary, findings with sources, Glassdoor
+4. **Report.** `<case>/05_report/report.md`: summary, findings with sources, Glassdoor
    numbers and practice questions.
 
 It stops after each stage for you to read what it wrote, and the next stage reads your edits.
-`uv run tools/status.py` lists every case and its next stage, and saying "resume" picks one up.
+Asking for status lists every case and its next stage, and saying "resume" picks one up.
 
 Your Glassdoor login stays in the browser's own profile, in `~/.cache/interview-detective/browser/`.
-`uv run tools/browser.py stop --forget` deletes it.
+Deleting that folder deletes it.
 
 ## How it works
 
@@ -65,12 +68,15 @@ The workspace is an [ICM](https://arxiv.org/abs/2603.16021) pipeline: folders ca
 carry the state, and each stage's contract says exactly what it reads and writes.
 
 - [CONTEXT.md](CONTEXT.md): the five stages on one screen.
-- [CLAUDE.md](CLAUDE.md): where everything lives, and where to go next.
+- [The skill](skills/interview-detective/SKILL.md): where everything lives, and where to go next.
 - [`_shared/agent-tiers.md`](_shared/agent-tiers.md): which model tier does which job.
 - [`_shared/browser.md`](_shared/browser.md): the browser, and handing logins to you.
+- [`setup/wizard.sh`](setup/wizard.sh): the first-run setup.
 
-Each interview is a case folder under `interviews/`. Cases hold scraped reviews and notes on real
-people's public work, so `.gitignore` keeps them out of the repo.
+The plugin is the factory: contracts, rules, templates and tools, replaced whole on each update. The
+cases are the product, so they live outside it, in the folder the wizard saved to
+`~/.config/interview-detective/config.env`. They hold scraped reviews and notes on real people's public
+work, and never leave your machine.
 
 ## Develop
 
@@ -78,14 +84,17 @@ Checks are [mise](https://mise.jdx.dev/) tasks, and CI runs the same ones (`.git
 
 ```bash
 mise run setup    # once after cloning: the pre-push secret scan
-mise run check    # every check: lint, types, tests with coverage, complexity, secrets, workflows
+mise run check    # every check: plugin validation, lint, types, tests with coverage, complexity, secrets, workflows
 ```
+
+`claude --plugin-dir .` loads the plugin from this folder, to try changes without installing them.
 
 The tests run offline, with Chromium and niri faked (`python3 -m unittest discover -s tests`).
 `tests/test_live.py` checks the real Glassdoor; its docstring says how to run it.
 
 Releases are automatic. PR titles follow [Conventional Commits](https://www.conventionalcommits.org/), and
-release-please keeps a release PR open that bumps `version.txt` and `CHANGELOG.md`. The
+release-please keeps a release PR open that bumps `version.txt`, the plugin's version in
+`.claude-plugin/plugin.json` (Claude Code updates a plugin only when that changes) and `CHANGELOG.md`. The
 interview-detective-bot App merges it once CI passes, which tags `vX.Y.Z` and publishes the release
 (`.github/workflows/release.yml`).
 

@@ -1,7 +1,3 @@
-# Cases hold scraped reviews and research on real people: they stay on this machine.
-interviews/*/
-_index/log.md
-
 __pycache__/
 .venv/
 

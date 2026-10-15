@@ -1,5 +1,8 @@
 #!/usr/bin/env python3
-"""Rebuild _index/log.md from what exists in interviews/*/. Never edit the log by hand.
+"""Rebuild <cases>/log.md from what exists in <cases>/*/, and print it. Never edit the log by hand.
+
+<cases> is $ID_CASES_DIR, else the ID_CASES_DIR line setup/wizard.sh saved in
+~/.config/interview-detective/config.env.
 
 A stage is done when its output exists:
   01 intake        01_intake/intake.md has `confirmed: true` in its frontmatter
@@ -9,10 +12,13 @@ A stage is done when its output exists:
   05 report        05_report/report.md
 """
 
+import os
 import re
+import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
+CONFIG = Path(os.environ.get("XDG_CONFIG_HOME") or Path.home() / ".config") / "interview-detective/config.env"
 STAGES = [
     (
         "01",
@@ -25,11 +31,21 @@ STAGES = [
 ]
 
 
+def cases_dir():
+    saved = re.findall(r"^ID_CASES_DIR=(.*)$", CONFIG.read_text(), re.MULTILINE) if CONFIG.exists() else []
+    found = os.environ.get("ID_CASES_DIR") or (saved[-1] if saved else "")
+    if not found:
+        sys.exit(f"interview-detective isn't set up yet: run bash {ROOT}/setup/wizard.sh in a terminal")
+    return Path(found).expanduser()
+
+
 def field(case, key):
     m = re.search(rf"^{key}:[ \t]*(.*)$", (case / "01_intake/intake.md").read_text(), re.MULTILINE)
     return m.group(1).strip() if m else ""
 
 
+cases = cases_dir()
+cases.mkdir(parents=True, exist_ok=True)
 rows = [
     "# Case log",
     "",
@@ -38,13 +54,13 @@ rows = [
     "| Case | Company | Role | Interview date | Done | Next |",
     "|---|---|---|---|---|---|",
 ]
-for case in sorted(p for p in (ROOT / "interviews").iterdir() if p.is_dir()):
+for case in sorted(p for p in cases.iterdir() if (p / "01_intake/intake.md").exists()):
     done = [n for n, test in STAGES if test(case)]
     nxt = next((n for n, _ in STAGES if n not in done), "finished")
     rows.append(
-        f"| [{case.name}](../interviews/{case.name}/) | {field(case, 'company')} | {field(case, 'role')} "
+        f"| [{case.name}]({case.name}/) | {field(case, 'company')} | {field(case, 'role')} "
         f"| {field(case, 'interview_date')} | {' '.join(done) or '-'} | {nxt} |"
     )
-(ROOT / "_index").mkdir(exist_ok=True)
-(ROOT / "_index/log.md").write_text("\n".join(rows) + "\n")
+(cases / "log.md").write_text("\n".join(rows) + "\n")
+print(f"Cases in {cases}\n")
 print("\n".join(rows[4:]))
