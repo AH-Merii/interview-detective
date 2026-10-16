@@ -19,6 +19,9 @@ Run with: uv run tools/browser.py COMMAND ...
 
   start [URL...]           start the browser (or open URLs as new tabs if it is running)
   stop [--forget]          close it; --forget also deletes the profile and its logins
+  login URL...             for a sign-in that refuses a browser that can be driven (Google says "Couldn't sign
+                           you in"): close the browser, open the profile with no DevTools port, and return when
+                           the user closes that window. The logins stay in the profile; then `start` again.
   tabs                     list tabs: index, title, url
   open URL                 open URL in a new tab
   text [-t TAB] [--max N]  the page's visible text
@@ -37,6 +40,7 @@ import argparse
 import base64
 import json
 import os
+import select
 import shutil
 import signal
 import socket
@@ -49,8 +53,8 @@ from pathlib import Path
 APP_ID = os.environ.get("ID_APP_ID", "dev.claude.lab")
 HOME = Path(os.environ.get("ID_BROWSER_HOME", Path.home() / ".cache/interview-detective/browser"))
 PROFILE, STATE, DOWNLOADS = HOME / "profile", HOME / "state.json", HOME / "downloads"
-FLAGS = [
-    "--remote-debugging-port=0",  # a free port, written to DevToolsActivePort in the profile
+# Without the DevTools port: what a login window runs with.
+LOGIN_FLAGS = [
     "--no-first-run",
     "--no-default-browser-check",
     "--password-store=basic",  # never the user's keyring
@@ -61,6 +65,7 @@ FLAGS = [
     "--disable-renderer-backgrounding",
     "--disable-backgrounding-occluded-windows",
 ]
+FLAGS = ["--remote-debugging-port=0", *LOGIN_FLAGS]  # a free port, written to DevToolsActivePort in the profile
 WORKSPACE = os.environ.get("ID_WORKSPACE", "interview-detective")
 # Methods that would raise the window or tab and take the user's focus.
 DENIED = {"Page.bringToFront", "Target.activateTarget"}
@@ -246,6 +251,47 @@ def place(pgid, timeout=10.0):
         print(f"window on workspace '{ws.get('name')}' of {ws.get('output')} (switch there to log in)")
 
 
+def launch(flags, urls):
+    """Chromium on our profile and app-id, without the tokens that would let it claim focus."""
+    (PROFILE / "Default").mkdir(parents=True, exist_ok=True)
+    DOWNLOADS.mkdir(parents=True, exist_ok=True)
+    prefs = PROFILE / "Default/Preferences"
+    if not prefs.exists():  # downloads go here, never the user's folder, and never ask where
+        prefs.write_text(json.dumps({"download": {"default_directory": str(DOWNLOADS), "prompt_for_download": False}}))
+    env = {k: v for k, v in os.environ.items() if k not in ("XDG_ACTIVATION_TOKEN", "DESKTOP_STARTUP_ID")}
+    with open(HOME / "chromium.log", "w") as log:  # Chromium keeps its own copy of the descriptor
+        return subprocess.Popen(
+            ["chromium", f"--class={APP_ID}", f"--user-data-dir={PROFILE}", *flags, *(urls or ["about:blank"])],
+            stdout=log,
+            stderr=log,
+            env=env,
+            start_new_session=True,
+        )
+
+
+def exited(pid, timeout):
+    """Wait for a process that isn't our child to exit, without polling (a pidfd is readable once it has)."""
+    try:
+        fd = os.pidfd_open(pid)
+    except ProcessLookupError:
+        return True
+    try:
+        return bool(select.select([fd], [], [], timeout)[0])
+    finally:
+        os.close(fd)
+
+
+def login(urls):
+    if STATE.exists():
+        stop(False)  # Chromium would hand this launch to the running browser, DevTools port and all
+    proc = launch(LOGIN_FLAGS, urls)
+    if niri("Windows") is not None:
+        place(proc.pid)
+    print("login window open: sign in there, then close the window")
+    proc.wait()
+    print(f"login window closed; the logins are kept in {PROFILE}")
+
+
 def start(urls):
     if STATE.exists():
         try:
@@ -255,21 +301,8 @@ def start(urls):
             return
         except SystemExit:
             STATE.unlink()  # a stale state file from a closed window
-    (PROFILE / "Default").mkdir(parents=True, exist_ok=True)
-    DOWNLOADS.mkdir(parents=True, exist_ok=True)
-    prefs = PROFILE / "Default/Preferences"
-    if not prefs.exists():  # downloads go here, never the user's folder, and never ask where
-        prefs.write_text(json.dumps({"download": {"default_directory": str(DOWNLOADS), "prompt_for_download": False}}))
     (PROFILE / "DevToolsActivePort").unlink(missing_ok=True)
-    env = {k: v for k, v in os.environ.items() if k not in ("XDG_ACTIVATION_TOKEN", "DESKTOP_STARTUP_ID")}
-    with open(HOME / "chromium.log", "w") as log:  # Chromium keeps its own copy of the descriptor
-        proc = subprocess.Popen(
-            ["chromium", f"--class={APP_ID}", f"--user-data-dir={PROFILE}", *FLAGS, *(urls or ["about:blank"])],
-            stdout=log,
-            stderr=log,
-            env=env,
-            start_new_session=True,
-        )
+    proc = launch(FLAGS, urls)
     for _ in range(100):
         try:
             p = int((PROFILE / "DevToolsActivePort").read_text().split()[0])
@@ -288,13 +321,13 @@ def stop(forget):
         pid = json.loads(STATE.read_text()).get("pid")
         try:
             os.killpg(pid, signal.SIGTERM)
+            exited(pid, 10)
         except (ProcessLookupError, PermissionError, TypeError):
             pass
         STATE.unlink()
     if niri("Workspaces") and any(w["name"] == WORKSPACE for w in niri("Workspaces")):
         niri({"Action": {"UnsetWorkspaceName": {"reference": {"Name": WORKSPACE}}}})  # niri then drops it once empty
     if forget:
-        time.sleep(1)
         shutil.rmtree(PROFILE, ignore_errors=True)
     print("stopped" + (" and forgot the profile" if forget else ""))
 
@@ -304,6 +337,7 @@ def parser():
     sub = p.add_subparsers(dest="cmd", required=True)
     sub.add_parser("start").add_argument("urls", nargs="*")
     sub.add_parser("stop").add_argument("--forget", action="store_true")
+    sub.add_parser("login").add_argument("urls", nargs="+")
     sub.add_parser("tabs")
     sub.add_parser("open").add_argument("url")
 
@@ -367,6 +401,8 @@ def main():
         return start(a.urls)
     if a.cmd == "stop":
         return stop(a.forget)
+    if a.cmd == "login":
+        return login(a.urls)
     if STATE.exists():
         n = gather(json.loads(STATE.read_text())["pid"])  # a login popup opened since the last command
         if n:

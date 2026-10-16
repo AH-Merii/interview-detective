@@ -298,10 +298,11 @@ say "Stage 03 reads Glassdoor's interview reviews, which needs you logged in the
 say "You can log in now, or when your first case gets to that stage."
 note "The login stays in the browser's own profile, in ~/.cache/interview-detective/browser/."
 if confirm "Log in to Glassdoor now?"; then
-  browser start https://www.glassdoor.com/ >/dev/null
-  step "Switch to the browser's workspace, sign in from the top right of the Glassdoor tab,"
-  step "and clear any \"Just a moment\" check."
-  pause "Press Enter once you're signed in"
+  step "A browser window opens on its own workspace. Switch to it, sign in from the top right of"
+  step "the Glassdoor page (Sign in with Google works), clear any \"Just a moment\" check, then"
+  step "close the window. This step finishes when you close it."
+  browser login https://www.glassdoor.com/ >/dev/null
+  ok "the login is kept in the browser's profile"
 fi
 browser stop >/dev/null 2>&1 || true
 ok "the browser is closed; it opens again when a case needs it"
