@@ -259,7 +259,10 @@ else
   if command -v wl-copy >/dev/null && confirm "Copy it to the clipboard?"; then
     printf '%s\n' "$RULE" | wl-copy && ok "copied"
   fi
-  step "Paste it into $NIRI_CONFIG/config.kdl (or a file it includes) and save; niri reloads it."
+  step "Paste it into $NIRI_CONFIG/cfg/agents.kdl (create it if needed) and save."
+  note "cfg/agents.kdl keeps the niri rules made for agents in one place."
+  step "If config.kdl doesn't include that file yet, add this line to it: include \"./cfg/agents.kdl\""
+  note "niri reloads the config when you save."
   while pause "Press Enter once it's saved" && ! has_rule; do
     warn "no rule for dev.claude.lab under $NIRI_CONFIG yet"
     if confirm "Skip it for now?"; then
