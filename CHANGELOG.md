@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.1](https://github.com/AH-Merii/interview-detective/compare/v0.3.0...v0.3.1) (2026-10-16)
+
+
+### Bug Fixes
+
+* **browser:** sign-ins happen in a window with no DevTools port ([#13](https://github.com/AH-Merii/interview-detective/issues/13)) ([75a3127](https://github.com/AH-Merii/interview-detective/commit/75a3127b29a5a5d9492aa39ee4cf2c0762db0cc1))
+
 ## [0.3.0](https://github.com/AH-Merii/interview-detective/compare/v0.2.2...v0.3.0) (2026-10-16)
 
 
