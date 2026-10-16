@@ -1,7 +1,7 @@
 {
   "name": "interview-detective",
   "displayName": "interview detective",
-  "version": "0.2.2",
+  "version": "0.3.0",
   "description": "Detective work before a job interview: researches the company's public GitHub, candidates' prep and the web in parallel, scrapes related Glassdoor interview reviews, checks each question found, and writes a sourced report with practice questions",
   "author": {
     "name": "AH-Merii (AbdulHamid Merii)",
