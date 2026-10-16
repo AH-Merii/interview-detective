@@ -212,8 +212,12 @@ missing() {
   fi
 }
 
-# has_rule: the niri config holds a rule for the browser's app-id.
-has_rule() { grep -rqsE 'dev\\?\.claude\\?\.lab' "$NIRI_CONFIG"; }
+# has_rule: the niri config holds a rule for the browser's app-id. -R follows symlinked files, as dotfile
+# managers leave them; -r skips them inside folders.
+has_rule() { grep -RqsE 'dev\\?\.claude\\?\.lab' "$NIRI_CONFIG"; }
+
+# Sourced by tests/test_wizard.py, which checks the helpers above: stop before the stages.
+(return 0 2>/dev/null) && return 0
 
 banner "interview-detective setup"
 
