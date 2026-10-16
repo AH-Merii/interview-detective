@@ -13,6 +13,7 @@ bash ${CLAUDE_PLUGIN_ROOT}/setup/wizard.sh
 ```
 
 It checks for uv, Chromium and a logged-in `gh`; asks where cases live and saves it to
-`~/.config/interview-detective/config.env`; on niri, checks the window rule that keeps the browser from
-taking focus; opens the browser once to check it; and offers a Glassdoor login. Running it again keeps
+`~/.config/interview-detective/config.env`; on niri, checks that niri loads the window rule that keeps the browser
+from taking focus, and with the user's approval adds it to `cfg/agents.kdl` (or a file they name) and
+includes that file from `config.kdl`; opens the browser once to check it; and offers a Glassdoor login. Running it again keeps
 what was saved unless they change it.

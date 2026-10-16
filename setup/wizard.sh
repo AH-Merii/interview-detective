@@ -194,14 +194,10 @@ TOTAL_STAGES=5
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 ENV_FILE="${XDG_CONFIG_HOME:-$HOME/.config}/interview-detective/config.env"
 mkdir -p "$(dirname "$ENV_FILE")"
-NIRI_CONFIG="${XDG_CONFIG_HOME:-$HOME/.config}/niri"
-RULE='window-rule {
-    match app-id=r#"^dev\.claude\.lab$"#
-    open-focused false
-}'
 
 ok() { printf '  %s✓%s %s\n' "$GREEN" "$RESET" "$1"; }
 browser() { uv run "$ROOT/tools/browser.py" "$@"; }
+niri_rule() { python3 "$ROOT/tools/niri_rule.py" "$@"; }
 
 # missing prints one line per requirement that isn't ready, with where to get it.
 missing() {
@@ -211,13 +207,6 @@ missing() {
   elif ! gh auth status >/dev/null 2>&1; then echo "gh is installed but not logged in: run gh auth login"
   fi
 }
-
-# has_rule: the niri config holds a rule for the browser's app-id. -R follows symlinked files, as dotfile
-# managers leave them; -r skips them inside folders.
-has_rule() { grep -RqsE 'dev\\?\.claude\\?\.lab' "$NIRI_CONFIG"; }
-
-# Sourced by tests/test_wizard.py, which checks the helpers above: stop before the stages.
-(return 0 2>/dev/null) && return 0
 
 banner "interview-detective setup"
 
@@ -251,25 +240,29 @@ stage "niri window rule"
 if [[ -z "${NIRI_SOCKET:-}" ]]; then
   note "You're not on niri, so there's nothing to add: the browser opens wherever your"
   note "compositor puts it, and may take focus when it does."
-elif has_rule; then
-  ok "your niri config already has a rule for the browser (app-id dev.claude.lab)"
+elif found=$(niri_rule find); then
+  ok "niri already loads the browser's rule, from $found"
 else
-  say "Add this rule to your niri config, so the browser opens without taking your focus:"
-  printf '\n%s\n\n' "$RULE" | sed 's/^/      /'
-  if command -v wl-copy >/dev/null && confirm "Copy it to the clipboard?"; then
-    printf '%s\n' "$RULE" | wl-copy && ok "copied"
-  fi
-  step "Paste it into $NIRI_CONFIG/cfg/agents.kdl (create it if needed) and save."
-  note "cfg/agents.kdl keeps the niri rules made for agents in one place."
-  step "If config.kdl doesn't include that file yet, add this line to it: include \"./cfg/agents.kdl\""
-  note "niri reloads the config when you save."
-  while pause "Press Enter once it's saved" && ! has_rule; do
-    warn "no rule for dev.claude.lab under $NIRI_CONFIG yet"
-    if confirm "Skip it for now?"; then
-      SKIPPED+=("the niri window rule: run this wizard again to see it")
-      break
+  say "The browser needs this niri rule, so it opens without taking your focus:"
+  printf '\n'; niri_rule rule | sed 's/^/      /'; printf '\n'
+  saved=$(sed -n 's/^ID_NIRI_RULE_FILE=//p' "$ENV_FILE" 2>/dev/null | tail -n1)
+  default="${saved:-$(niri_rule target)}"
+  say "It goes in a file kept for niri rules made for agents, included from config.kdl."
+  note "Enter keeps the file shown, or type another (relative to the niri config's folder)."
+  printf '  %sFile for the rule%s %s[%s]%s ' "$BOLD" "$RESET" "$DIM" "$default" "$RESET"
+  read -r file || true
+  file="${file:-$default}"
+  if confirm "Add the rule to $file, and include that file from config.kdl if it isn't yet?"; then
+    if niri_rule add "$file"; then
+      write_env ID_NIRI_RULE_FILE "$file"
+      ok "niri reloads its config by itself, so the rule is live"
+    else
+      SKIPPED+=("the niri window rule: niri rejected the change, so nothing was changed (see the message above)")
+      warn "nothing was changed; the summary lists it"
     fi
-  done
+  else
+    SKIPPED+=("the niri window rule: run this wizard again to add it")
+  fi
 fi
 if [[ -n "${NIRI_SOCKET:-}" ]]; then
   if niri validate >/dev/null 2>&1; then ok "niri validate: the config is valid"

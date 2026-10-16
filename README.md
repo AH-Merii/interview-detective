@@ -36,10 +36,12 @@ and the [`gh`](https://cli.github.com/) CLI, logged in. The setup wizard checks 
 
    It checks the requirements and asks where your cases should live (`~/interview-detective` by
    default). On [niri](https://github.com/YaLTeR/niri) it checks for the window rule that keeps the
-   browser from taking your focus; if it's missing, it shows the rule to paste into
-   `~/.config/niri/cfg/agents.kdl`, the file for rules made for agents, included from `config.kdl`.
-   Then it opens the browser once to check it, and offers a Glassdoor login. Run it again any time to
-   change your answers.
+   browser from taking your focus. If niri doesn't load that rule yet, the wizard shows it and offers to
+   add it, once you approve, to `~/.config/niri/cfg/agents.kdl`, the file for rules made for agents.
+   It uses an `agents.kdl` your config already includes, if there is one, and you can name another file.
+   It also adds the `include` line to `config.kdl` if it's missing. If `niri validate` rejects the
+   result, both files go back to how they were. Then it opens the browser once to check it, and offers
+   a Glassdoor login. Run it again any time: anything already in place is left alone.
 
 3. In Claude Code, from any folder, run `/interview-detective:interview-detective` or say you have an
    interview coming up.
