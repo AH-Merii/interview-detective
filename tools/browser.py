@@ -7,7 +7,7 @@
 Modelled on niri-screen-lab's browser lab (AH-Merii/claude-plugins#48), except the window stays visible:
 the user clears captchas and logs in there, and agents look and act through DevTools only (never the real
 keyboard or mouse). The window never takes focus:
-  - it opens with app-id dev.claude.lab, which the user's niri window rule (cfg/rules.kdl) opens with
+  - it opens with app-id dev.claude.lab, which the user's niri window rule (cfg/agents.kdl) opens with
     `open-focused false`; set ID_APP_ID to use another rule;
   - it starts without XDG_ACTIVATION_TOKEN or DESKTOP_STARTUP_ID, which would let it claim focus;
   - once open, it is moved, unfocused, to a new workspace named `interview-detective` on the output the

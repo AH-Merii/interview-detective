@@ -45,16 +45,16 @@ class NiriRuleTest(unittest.TestCase):
     def test_finds_the_rule_however_the_config_is_laid_out(self):
         layouts = {
             "in config.kdl": lambda: self.write(self.niri / "config.kdl", RULE),
-            "in an included file": lambda: self.write(self.niri / "cfg/rules.kdl", RULE),
+            "in an included file": lambda: self.write(self.niri / "cfg/agents.kdl", RULE),
             "in a symlinked config.kdl": lambda: (self.niri / "config.kdl").symlink_to(
                 self.write(self.dotfiles / "config.kdl", RULE)
             ),
             "in a symlinked included file": lambda: (
                 (self.niri / "cfg").mkdir(),
-                (self.niri / "cfg/rules.kdl").symlink_to(self.write(self.dotfiles / "rules.kdl", RULE)),
+                (self.niri / "cfg/agents.kdl").symlink_to(self.write(self.dotfiles / "agents.kdl", RULE)),
             ),
             "in a symlinked folder of included files": lambda: (self.niri / "cfg").symlink_to(
-                self.write(self.dotfiles / "cfg/rules.kdl", RULE).parent
+                self.write(self.dotfiles / "cfg/agents.kdl", RULE).parent
             ),
         }
         for name, lay_out in layouts.items():
@@ -68,7 +68,7 @@ class NiriRuleTest(unittest.TestCase):
         self.fresh()
         self.write(self.niri / "config.kdl", 'window-rule {\n    match app-id="firefox"\n}\n')
         (self.niri / "cfg").mkdir()
-        (self.niri / "cfg/rules.kdl").symlink_to(self.write(self.dotfiles / "rules.kdl", "layout {}\n"))
+        (self.niri / "cfg/agents.kdl").symlink_to(self.write(self.dotfiles / "agents.kdl", "layout {}\n"))
         self.assertFalse(self.has_rule())
 
 
