@@ -53,8 +53,10 @@ and the [`gh`](https://cli.github.com/) CLI, logged in. The setup wizard checks 
    it's right.
 2. **Research and Glassdoor, at the same time.** Agents search GitHub and the web in the background.
    A Chromium window opens on a new workspace called `interview-detective` on your current screen;
-   switch to it, log in to Glassdoor and clear any Cloudflare check, then tell Claude. If research hits
-   pages behind a captcha or login, they open as more tabs there for you to clear.
+   switch to it, sign in to Glassdoor (Sign in with Google works) and clear any Cloudflare check, then
+   close the window. If research hits pages behind a captcha or login, they open as more tabs there.
+   Nothing can drive that window while you use it, so sites that refuse automated browsers still let
+   you sign in. Claude reopens the browser for its agents once you close it.
 3. **Question check.** Every reported question is matched to a standard problem, a variant, or marked
    as specific to the company. Star (★) the ones you want the report to favour.
 4. **Report.** `<case>/05_report/report.md`: summary, findings with sources, Glassdoor

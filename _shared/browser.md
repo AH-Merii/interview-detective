@@ -2,17 +2,23 @@
 
 `tools/browser.py` runs one visible Chromium shared by every stage (`uv run tools/browser.py -h`).
 It opens on its own niri workspace, `interview-detective`, on the user's current output, without
-taking focus. The user switches there to log in or clear a captcha; agents read and act through
-DevTools only. Logins persist in its profile (`~/.cache/interview-detective/browser/profile`) until
-`stop --forget`.
+taking focus. Agents read and act through DevTools only. Logins persist in its profile
+(`~/.cache/interview-detective/browser/profile`) until `stop --forget`.
+
+The user signs in and clears captchas in a login window instead: the same profile with no DevTools port.
+Sites can tell when a browser can be driven, and some refuse to sign it in: Google says "Couldn't sign
+you in", which also blocks every "Sign in with Google" button.
 
 ## When a page needs the user
-1. Open each page as a tab: `uv run tools/browser.py start URL [URL...]` (opens tabs if it is already
-   running). Several sites at once are fine; one tab each.
-2. Tell the user, in one message: the workspace name, the tabs, and what each needs (log in, captcha).
-3. Wait for them to say they are done. Never type credentials or solve a captcha yourself.
+1. Open every page that needs them in one login window, in the background (it blocks until the window
+   closes, and you're told when it does): `uv run tools/browser.py login URL [URL...]`. It closes the
+   agents' browser first, so finish reading before you call it.
+2. Tell the user, in one message: the workspace name, the tabs, what each needs (sign in, captcha), and
+   to close the window when they're done.
+3. When `login` returns, start the agents' browser on the same pages: `uv run tools/browser.py start
+   URL [URL...]`. Never type credentials or solve a captcha yourself.
 4. Check each tab: `uv run tools/browser.py text -t <url-part> --max 2000`. If it still shows a login
-   or a check, say which, and ask again.
+   or a check, say which, and run `login` again for it.
 
 ## Reading an unlocked page (a `haiku` reader agent)
 Prompt: the tab's url part, what to extract, the output file. The reader uses `text`, `js`, `goto`,

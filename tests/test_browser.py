@@ -22,14 +22,29 @@ from support import ROOT, FakeNiri  # first: it puts tools/ on sys.path
 import browser
 
 FAKE_CHROMIUM = """#!/usr/bin/env python3
-# Records how it was started, says where DevTools listens, then waits like a running browser.
-import json, os, sys, time
+# Appends how it was started, and which earlier launches were still running, to FAKE_LOG (one JSON line per
+# launch). With a DevTools port it says where DevTools listens and runs until killed; without one it is a window
+# the user signs in to and closes after FAKE_WINDOW_OPEN_FOR seconds.
+import json, os, signal, sys, time
 profile = next(a.split("=", 1)[1] for a in sys.argv if a.startswith("--user-data-dir="))
-with open(os.environ["FAKE_LOG"], "w") as f:
-    json.dump({"argv": sys.argv[1:], "env": dict(os.environ)}, f)
-with open(os.path.join(profile, "DevToolsActivePort"), "w") as f:
-    f.write("9222\\n/devtools/browser/fake\\n")
-time.sleep(60)
+def running(pid):
+    try:
+        return open(f"/proc/{pid}/stat").read().split()[2] != "Z"
+    except OSError:
+        return False
+log = os.environ["FAKE_LOG"]
+earlier = [json.loads(line)["pid"] for line in open(log)] if os.path.exists(log) else []
+with open(log, "a") as f:
+    record = {"argv": sys.argv[1:], "env": dict(os.environ), "pid": os.getpid()}
+    f.write(json.dumps(record | {"running": [p for p in earlier if running(p)]}) + "\\n")
+if any(a.startswith("--remote-debugging-port") for a in sys.argv):
+    # like Chromium, it takes a moment to shut down after SIGTERM
+    signal.signal(signal.SIGTERM, lambda *_: (time.sleep(0.5), sys.exit(0)))
+    with open(os.path.join(profile, "DevToolsActivePort"), "w") as f:
+        f.write("9222\\n/devtools/browser/fake\\n")
+    time.sleep(60)
+else:
+    time.sleep(float(os.environ.get("FAKE_WINDOW_OPEN_FOR", "1")))
 """
 
 
@@ -81,7 +96,7 @@ class CommandsTest(unittest.TestCase):
     def test_every_command_has_a_handler(self):
         sub = next(a for a in browser.parser()._actions if isinstance(a, argparse._SubParsersAction))
         self.assertIn("click", sub.choices)
-        self.assertEqual(set(sub.choices) - set(browser.TAB_COMMANDS), {"start", "stop", "tabs", "open"})
+        self.assertEqual(set(sub.choices) - set(browser.TAB_COMMANDS), {"start", "stop", "tabs", "open", "login"})
 
 
 class LaunchTest(unittest.TestCase):
@@ -94,7 +109,7 @@ class LaunchTest(unittest.TestCase):
         self.env = env | {
             "PATH": f"{self.tmp / 'bin'}:{env['PATH']}",
             "ID_BROWSER_HOME": str(self.tmp / "home"),
-            "FAKE_LOG": str(self.tmp / "launch.json"),
+            "FAKE_LOG": str(self.tmp / "launches.jsonl"),
             "XDG_ACTIVATION_TOKEN": "token",
             "DESKTOP_STARTUP_ID": "startup",
         }
@@ -110,10 +125,20 @@ class LaunchTest(unittest.TestCase):
             check=False,
         )
 
+    def launches(self):
+        return [json.loads(line) for line in (self.tmp / "launches.jsonl").read_text().splitlines()]
+
+    @staticmethod
+    def running(pid):
+        try:
+            return Path(f"/proc/{pid}/stat").read_text().split()[2] != "Z"
+        except OSError:
+            return False
+
     def test_starts_unable_to_claim_focus_on_its_own_profile(self):
         r = self.browser("start", "https://example.com")
         self.assertEqual(r.returncode, 0, r.stderr)
-        launch = json.loads((self.tmp / "launch.json").read_text())
+        (launch,) = self.launches()
         self.assertNotIn("XDG_ACTIVATION_TOKEN", launch["env"])
         self.assertNotIn("DESKTOP_STARTUP_ID", launch["env"])
         self.assertIn("--class=dev.claude.lab", launch["argv"])
@@ -135,6 +160,29 @@ class LaunchTest(unittest.TestCase):
             time.sleep(0.1)
         else:
             self.fail("the browser process outlived stop")
+
+    def test_login_opens_the_profile_with_nothing_attached_and_returns_once_the_window_closes(self):
+        """Google refuses to sign in a browser that can be driven ("Couldn't sign you in"), so a login window
+        has no DevTools port. It is still our profile, our app-id and unable to claim focus."""
+        r = self.browser("login", "https://accounts.google.com/")
+        self.assertEqual(r.returncode, 0, r.stderr)
+        (launch,) = self.launches()
+        self.assertEqual([a for a in launch["argv"] if "remote-debugging" in a], [])
+        self.assertIn("https://accounts.google.com/", launch["argv"])
+        self.assertIn("--class=dev.claude.lab", launch["argv"])
+        self.assertIn(f"--user-data-dir={self.tmp / 'home/profile'}", launch["argv"])
+        self.assertNotIn("XDG_ACTIVATION_TOKEN", launch["env"])
+        self.assertNotIn("DESKTOP_STARTUP_ID", launch["env"])
+        self.assertFalse(self.running(launch["pid"]), "returned before the user closed the window")
+
+    def test_login_closes_a_running_browser_on_the_profile_first(self):
+        """Chromium hands a second launch on the same profile to the one running, which has a DevTools port."""
+        self.assertEqual(self.browser("start").returncode, 0)
+        r = self.browser("login", "https://accounts.google.com/")
+        self.assertEqual(r.returncode, 0, r.stderr)
+        _, login = self.launches()
+        self.assertEqual(login["running"], [], "the browser with a DevTools port was still running")
+        self.assertFalse((self.tmp / "home/state.json").exists())
 
 
 class GatherTest(unittest.TestCase):
