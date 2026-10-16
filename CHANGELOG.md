@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.0](https://github.com/AH-Merii/interview-detective/compare/v0.2.2...v0.3.0) (2026-10-16)
+
+
+### Features
+
+* **wizard:** add the niri rule itself, after the user approves ([#10](https://github.com/AH-Merii/interview-detective/issues/10)) ([5aa31f1](https://github.com/AH-Merii/interview-detective/commit/5aa31f16d1152ca033973b0577ab469f76daa1e3))
+
 ## [0.2.2](https://github.com/AH-Merii/interview-detective/compare/v0.2.1...v0.2.2) (2026-10-16)
 
 
