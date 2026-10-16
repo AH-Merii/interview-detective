@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.1](https://github.com/AH-Merii/interview-detective/compare/v0.2.0...v0.2.1) (2026-10-16)
+
+
+### Bug Fixes
+
+* **wizard:** find the niri rule in symlinked config files ([#6](https://github.com/AH-Merii/interview-detective/issues/6)) ([cf7093b](https://github.com/AH-Merii/interview-detective/commit/cf7093b50a9598e4bd14f743af9aec86fe54a64d))
+
 ## [0.2.0](https://github.com/AH-Merii/interview-detective/compare/v0.1.0...v0.2.0) (2026-10-15)
 
 
