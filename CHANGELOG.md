@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.2](https://github.com/AH-Merii/interview-detective/compare/v0.2.1...v0.2.2) (2026-10-16)
+
+
+### Bug Fixes
+
+* **wizard:** put the niri window rule in cfg/agents.kdl ([#8](https://github.com/AH-Merii/interview-detective/issues/8)) ([a39abcb](https://github.com/AH-Merii/interview-detective/commit/a39abcbd6f00f91bbbd5d5e8e420510469e4e9b6))
+
 ## [0.2.1](https://github.com/AH-Merii/interview-detective/compare/v0.2.0...v0.2.1) (2026-10-16)
 
 
