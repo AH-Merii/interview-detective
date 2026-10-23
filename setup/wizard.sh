@@ -293,16 +293,16 @@ fi
 pause
 
 # ── Stage 5 ───────────────────────────────────────────────────────────────
-stage "Glassdoor login (optional)"
-say "Stage 03 reads Glassdoor's interview reviews, which needs you logged in there."
-say "You can log in now, or when your first case gets to that stage."
-note "The login stays in the browser's own profile, in ~/.cache/interview-detective/browser/."
-if confirm "Log in to Glassdoor now?"; then
-  step "A browser window opens on its own workspace. Switch to it, sign in from the top right of"
-  step "the Glassdoor page (Sign in with Google works), clear any \"Just a moment\" check, then"
+stage "Glassdoor and LinkedIn logins (optional)"
+say "Stage 03 reads Glassdoor's interview reviews, and the research looks people up on LinkedIn;"
+say "both need you logged in. You can log in now, or when your first case starts its research."
+note "The logins stay in the browser's own profile, in ~/.cache/interview-detective/browser/."
+if confirm "Log in to Glassdoor and LinkedIn now?"; then
+  step "A browser window opens on its own workspace, with a tab for each. Switch to it, sign in on"
+  step "both tabs (Sign in with Google works on Glassdoor), clear any \"Just a moment\" check, then"
   step "close the window. This step finishes when you close it."
-  browser login https://www.glassdoor.com/ >/dev/null
-  ok "the login is kept in the browser's profile"
+  browser login https://www.glassdoor.com/ https://www.linkedin.com/login >/dev/null
+  ok "the logins are kept in the browser's profile"
 fi
 browser stop >/dev/null 2>&1 || true
 ok "the browser is closed; it opens again when a case needs it"

@@ -13,9 +13,10 @@ outputs land in `<case>/NN_*/`.
 | `04_question-check` | is each question standard? | 01, 02, 03 | `question-bank.md` | user skims the bank |
 | `05_report` | summary, findings, practice | 01–04 | `report.md` | user reads it |
 
-02 and 03 depend only on 01, so they run at the same time: start the 02 lanes in the background, then
-work through 03 with the user (it needs their logins). Pages that 02's lanes find blocked are opened as
-extra tabs in the same browser, so the user clears everything in one visit.
+02 and 03 depend only on 01, so they run at the same time. First the user signs in to every site the
+case reads behind a login, in one window (`_shared/browser.md`); then start the 02 lanes in the
+background and work through 03 with the user. Pages that 02's lanes still find blocked, on any site, go
+to the user in one more window.
 
 Factory (every run): `stages/`, `_shared/`, `tools/`. Product (each run): `<cases>/<case>/`.
 Status is whatever exists: `tools/status.py` (rules in its docstring).

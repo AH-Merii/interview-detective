@@ -1,6 +1,6 @@
 ---
 name: interview-detective
-description: Prepare for a job interview by detective work. Asks what company, role and round, then researches in parallel (similar exercises on the web, the company's and employees' public GitHub, candidates' uploaded prep, creative leads), scrapes related Glassdoor interview reviews into priority-grouped JSON with the user logging in, checks whether each question is standard, and writes a sourced report with practice questions. Use when the user says they have an interview coming up, wants interview prep or intel on a company's interview, says "interview-detective", or wants to resume or check the status of a prep case.
+description: Prepare for a job interview by detective work. Asks what company, role and round, then researches in parallel (similar exercises on the web, the company's and employees' public GitHub, candidates' uploaded prep, creative leads), scrapes related Glassdoor interview reviews into priority-grouped JSON, has the user sign in wherever a page needs it, checks whether each question is standard, and writes a sourced report with practice questions. Use when the user says they have an interview coming up, wants interview prep or intel on a company's interview, says "interview-detective", or wants to resume or check the status of a prep case.
 ---
 
 # interview-detective
@@ -44,7 +44,7 @@ bash ${CLAUDE_PLUGIN_ROOT}/setup/wizard.sh
 | If | Go to | Then stop at |
 |---|---|---|
 | a new interview to prepare | `tools/new_case.sh <company> <role>`, then `stages/01_intake/CONTEXT.md` | user confirms `intake.md` |
-| intake confirmed | `stages/02_research/` and `stages/03_glassdoor/`, at the same time | user reads `findings.md` and `stats.md` |
+| intake confirmed | the sign-in in `_shared/browser.md`, then `stages/02_research/` and `stages/03_glassdoor/`, at the same time | user reads `findings.md` and `stats.md` |
 | research and Glassdoor read | `stages/04_question-check/CONTEXT.md` | user skims `question-bank.md` |
 | question bank read | `stages/05_report/CONTEXT.md` | user reads `report.md` |
 | asked for status | `tools/status.py` | report the table |

@@ -41,7 +41,7 @@ and the [`gh`](https://cli.github.com/) CLI, logged in. The setup wizard checks 
    It uses an `agents.kdl` your config already includes, if there is one, and you can name another file.
    It also adds the `include` line to `config.kdl` if it's missing. If `niri validate` rejects the
    result, both files go back to how they were. Then it opens the browser once to check it, and offers
-   a Glassdoor login. Run it again any time: anything already in place is left alone.
+   Glassdoor and LinkedIn logins. Run it again any time: anything already in place is left alone.
 
 3. In Claude Code, from any folder, run `/interview-detective:interview-detective` or say you have an
    interview coming up.
@@ -51,10 +51,12 @@ and the [`gh`](https://cli.github.com/) CLI, logged in. The setup wizard checks 
 1. **Intake.** It asks for the company, role and round, and what you already have: emails, a job post,
    a take-home. It writes `<case>/01_intake/intake.md` in your cases folder; read it, fix anything wrong, and say
    it's right.
-2. **Research and Glassdoor, at the same time.** Agents search GitHub and the web in the background.
-   A Chromium window opens on a new workspace called `interview-detective` on your current screen;
-   switch to it, sign in to Glassdoor (Sign in with Google works) and clear any Cloudflare check, then
-   close the window. If research hits pages behind a captcha or login, they open as more tabs there.
+2. **Sign in, then research and Glassdoor at the same time.** A Chromium window opens on a new
+   workspace called `interview-detective` on your current screen, with a tab for each site the case
+   reads behind a login: Glassdoor (Sign in with Google works) and LinkedIn, plus any your intake names.
+   Switch to it, sign in, clear any Cloudflare check, then close the window. Sites you're already
+   signed in to are skipped. Agents then search GitHub and the web in the background. If research hits
+   other pages behind a captcha or login, they open in one more window for you.
    Nothing can drive that window while you use it, so sites that refuse automated browsers still let
    you sign in. Claude reopens the browser for its agents once you close it.
 3. **Question check.** Every reported question is matched to a standard problem, a variant, or marked
@@ -65,8 +67,8 @@ and the [`gh`](https://cli.github.com/) CLI, logged in. The setup wizard checks 
 It stops after each stage for you to read what it wrote, and the next stage reads your edits.
 Asking for status lists every case and its next stage, and saying "resume" picks one up.
 
-Your Glassdoor login stays in the browser's own profile, in `~/.cache/interview-detective/browser/`.
-Deleting that folder deletes it.
+Your logins stay in the browser's own profile, in `~/.cache/interview-detective/browser/`.
+Deleting that folder deletes them.
 
 ## How it works
 

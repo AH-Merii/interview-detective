@@ -9,7 +9,21 @@ The user signs in and clears captchas in a login window instead: the same profil
 Sites can tell when a browser can be driven, and some refuse to sign it in: Google says "Couldn't sign
 you in", which also blocks every "Sign in with Google" button.
 
+## Sign in before the research
+Once the intake is confirmed, before 02's lanes and 03 start, get the user signed in to every site the
+case reads behind a login:
+- Glassdoor: 03 scrapes its interview reviews (Sign in with Google works there);
+- LinkedIn: the people lanes look up the interviewer and the team, and profiles and posts need a login;
+- any other site the intake names that needs an account.
+
+`uv run tools/browser.py start` on a page of each site, and check each tab as in step 4 below. Every
+site that shows a sign-in, a captcha or a check goes into one login window (steps 1–3). If every site
+is already signed in, say so and go on.
+
 ## When a page needs the user
+Any page an agent needs that shows a login, a captcha or a check goes to the user, whatever the site.
+Only pages that are gone (404, 410) are dropped, and the stage's output says which.
+
 1. Open every page that needs them in one login window, in the background (it blocks until the window
    closes, and you're told when it does): `uv run tools/browser.py login URL [URL...]`. It closes the
    agents' browser first, so finish reading before you call it.
