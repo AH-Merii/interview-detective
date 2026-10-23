@@ -24,9 +24,10 @@ Do NOT load: `03_glassdoor` outputs (that stage runs beside this one), other cas
    | wildcard | `references/lanes/wildcard.md` | `opus` |
 
 2. While they run, work on `03_glassdoor` with the user.
-3. When the lanes are back, collect every `## Blocked` entry. Open them as tabs and have the user clear
-   them in one visit (`_shared/browser.md`), then send one `haiku` reader per site; each appends its
-   findings to the lane file that listed the page.
+3. When the lanes are back, collect every `## Blocked` entry, whatever the site. Start the browser on
+   them and check each tab: sites signed in to before the research usually load. Have the user clear
+   the rest in one login window (`_shared/browser.md`), then send one `haiku` reader per site; each
+   appends its findings to the lane file that listed the page.
 4. Write `findings.md` from the lane files: merge duplicates, keep each finding's source and confidence,
    order by how directly it speaks to this round. End with what was looked for and not found.
 

@@ -13,10 +13,8 @@ Do NOT load: `02_research` outputs, other cases, `interviews.json` whole (query 
 ## Process
 1. Find the company's interviews page (intake's `glassdoor_url`, or search
    "<company> glassdoor interview questions"); use the user's country domain.
-2. Unless the browser's profile is already signed in to Glassdoor, run `uv run tools/browser.py login <url>`
-   in the background, and ask the user to sign in (Sign in with Google works there) and clear Cloudflare on
-   the `interview-detective` workspace, then close the window (`_shared/browser.md`). When it returns,
-   `uv run tools/browser.py start <url>`.
+2. `uv run tools/browser.py start <url>`. The sign-in before the research covered Glassdoor; if the
+   page still shows a login or a Cloudflare check, send it to the user (`_shared/browser.md`).
 3. `uv run tools/glassdoor.py probe <url>`: the count decides the scope (`references/scope.md`).
 4. Write `scope.json`. Over the threshold, show the user the role filters and the A/B lists and wait
    for approval before scraping; under it, show them and go on.
