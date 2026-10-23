@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.4.0](https://github.com/AH-Merii/interview-detective/compare/v0.3.1...v0.4.0) (2026-10-23)
+
+
+### Features
+
+* html reading pages with why pages, people search from LinkedIn, and a practice plan ([#18](https://github.com/AH-Merii/interview-detective/issues/18)) ([6464cea](https://github.com/AH-Merii/interview-detective/commit/6464cea0431fbe2b99cd54fbd5df6a0d2cbd0c94))
+* sign in to every site the research needs before it starts ([#17](https://github.com/AH-Merii/interview-detective/issues/17)) ([2bb3672](https://github.com/AH-Merii/interview-detective/commit/2bb36720b38015dbe30e9827ad8092726caa3f34))
+
+
+### Bug Fixes
+
+* **glassdoor:** long review texts arrive whole, not as references ([#16](https://github.com/AH-Merii/interview-detective/issues/16)) ([4a39d2f](https://github.com/AH-Merii/interview-detective/commit/4a39d2f52ea62c94ba05030009db23cada7373d2))
+
 ## [0.3.1](https://github.com/AH-Merii/interview-detective/compare/v0.3.0...v0.3.1) (2026-10-16)
 
 
