@@ -11,6 +11,12 @@ inputs (link, Glassdoor id, or file). Aim for something the user can read in 15 
 Five to eight sentences: what this round most likely is, what it tests, the two or three things to
 prepare first, and how sure we are.
 
+## Practice plan
+A day-by-day plan sized to the time the intake gives (days, hours a day), for the next round first.
+Each day names its question-bank ids and what to do with each, with rough hours marked as estimates.
+End with what to skip if time runs short, and a short checklist for the interview day drawn from the
+findings.
+
 ## What the process looks like
 The stages candidates describe, in order, with how long each takes and how often each is reported
 (from stats.md and findings). Note when the process changed and which reports are recent.

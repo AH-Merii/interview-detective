@@ -13,8 +13,8 @@ Do NOT load: other cases, `stages/02+`, `_shared/` (nothing here searches or scr
    `tools/new_case.sh "<company>" "<role>"` and work in the folder it prints.
 2. Ask the rest of the stamp's questions a few at a time, in its order: the round and its format, the
    panel, what the recruiter said, the team and stack, the job post, anything already received
-   (exercises, emails), other leads, which roles count as the same job (A) or adjacent (B), and what
-   the user wants most. Skip what the user says they don't know; never invent an answer.
+   (exercises, emails), other leads, which roles count as the same job (A) or adjacent (B), how much
+   time they have to prepare (days, and hours a day), and what the user wants most. Skip what the user says they don't know; never invent an answer.
 3. Write the answers into `intake.md`, keeping the user's wording. Paste received exercises in full.
 4. Show the file's path and a five-line summary; ask the user to read and correct it.
 
