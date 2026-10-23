@@ -46,5 +46,8 @@ What was searched and came up empty, and what the user might ask the recruiter.
 Every link cited above, once.
 ```
 
-Favour items the user starred (`★`) in the question bank. Do not invent questions with no basis in the
-inputs; a "worth preparing" item names the finding or topic it comes from.
+Weight the report toward the next round; later rounds come second. Favour items the user starred
+(`★`) in the question bank. Link each inference to its why page, `([why](../<stage>/why/<slug>.html))`,
+and mark an inference no page covers `speculative`, saying in a clause what it rests on. Do not invent
+questions with no basis in the inputs; a "worth preparing" item names the finding or topic it comes
+from.

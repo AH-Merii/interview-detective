@@ -6,7 +6,8 @@ merge it into `findings.md`.
 ## Inputs
 - Working (this run): `<case>/01_intake/intake.md`
 - Reference: `references/lanes/*.md` (one brief per lane), `references/lane-output.md`
-- Reference: `../../_shared/agent-tiers.md`, `../../_shared/evidence.md`, `../../_shared/browser.md`
+- Reference: `../../_shared/agent-tiers.md`, `../../_shared/evidence.md`, `../../_shared/browser.md`,
+  `../../_shared/pages.md`
 
 Do NOT load: `03_glassdoor` outputs (that stage runs beside this one), other cases.
 
@@ -20,7 +21,7 @@ Do NOT load: `03_glassdoor` outputs (that stage runs beside this one), other cas
    | exercises | `references/lanes/exercises.md` | `sonnet` |
    | company-github | `references/lanes/company-github.md` | `sonnet` |
    | candidate-prep | `references/lanes/candidate-prep.md` | `sonnet` |
-   | people-github | `references/lanes/people-github.md` | `opus` |
+   | people | `references/lanes/people.md` | `opus` |
    | wildcard | `references/lanes/wildcard.md` | `opus` |
 
 2. While they run, work on `03_glassdoor` with the user.
@@ -30,10 +31,17 @@ Do NOT load: `03_glassdoor` outputs (that stage runs beside this one), other cas
    appends its findings to the lane file that listed the page.
 4. Write `findings.md` from the lane files: merge duplicates, keep each finding's source and confidence,
    order by how directly it speaks to this round. End with what was looked for and not found.
+5. Check the findings the user will act on first-hand before they read them: the round's format and
+   task, the interviewer, and every premise behind an inference. Re-read each source yourself (open the
+   page, run the `gh` command, read the intake lines); correct what a lane got wrong, and mark what you
+   re-read `checked`.
+6. Write a why page for each inference into `why/claims.json`, and link it from `findings.md`
+   (`../../_shared/pages.md`). Run `tools/render.py` and `tools/check.py`, and fix what the check reports.
 
 ## Outputs
 - `<case>/02_research/lanes/<lane>.md`, one per lane
-- `<case>/02_research/findings.md`
+- `<case>/02_research/findings.md`, `findings.html`, and `why/claims.json` with a page per inference
 
 ## Human check
-The user reads `findings.md` and deletes or corrects wrong leads in place; 04 and 05 read what is left.
+The user reads `findings.html` and deletes or corrects wrong leads in `findings.md`; 04 and 05 read
+what is left. Render and check again after their edits.

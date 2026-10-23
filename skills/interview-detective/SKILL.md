@@ -22,9 +22,9 @@ to it unless they start with `<cases>`. Run tools by their full path, as in
 |---|---|
 | `CONTEXT.md` | the pipeline on one screen |
 | `stages/` | the stage contracts, in order |
-| `_shared/` | rules every stage follows: agent tiers, evidence, the browser |
+| `_shared/` | rules every stage follows: agent tiers, evidence, the browser, the pages the user reads |
 | `_templates/interview/` | the stamp a new case is copied from |
-| `tools/` | browser, Glassdoor scraper, new case, status |
+| `tools/` | browser, Glassdoor scraper, new case, status, rendering and checking the pages |
 | `<cases>/<case>/` | one case per interview (product): `01_intake/` … `05_report/` outputs |
 | `<cases>/log.md` | generated case list and status; rebuilt by `tools/status.py` |
 
@@ -44,14 +44,16 @@ bash ${CLAUDE_PLUGIN_ROOT}/setup/wizard.sh
 | If | Go to | Then stop at |
 |---|---|---|
 | a new interview to prepare | `tools/new_case.sh <company> <role>`, then `stages/01_intake/CONTEXT.md` | user confirms `intake.md` |
-| intake confirmed | the sign-in in `_shared/browser.md`, then `stages/02_research/` and `stages/03_glassdoor/`, at the same time | user reads `findings.md` and `stats.md` |
-| research and Glassdoor read | `stages/04_question-check/CONTEXT.md` | user skims `question-bank.md` |
-| question bank read | `stages/05_report/CONTEXT.md` | user reads `report.md` |
+| intake confirmed | the sign-in in `_shared/browser.md`, then `stages/02_research/` and `stages/03_glassdoor/`, at the same time | user reads `findings.html` and `stats.md` |
+| research and Glassdoor read | `stages/04_question-check/CONTEXT.md` | user skims `question-bank.html` |
+| question bank read | `stages/05_report/CONTEXT.md` | user reads `report.html` |
+| the intake changed after research began (a new interviewer, a new round) | update `intake.md` with the user; rerun only the lanes that depend on what changed, fold their findings into `findings.md`, and redo the later stages that cite them | user reads what changed |
 | asked for status | `tools/status.py` | report the table |
 | resuming a case | `tools/status.py`; the Next column names the stage | that stage's human check |
 
 For a new interview, ask for the company and role before anything else. Read only the contract of the
-stage you are on.
+stage you are on. To show the user a page, give the commands `tools/render.py` prints: they hold full
+paths, so they work whatever the current folder.
 
 ## The one rule
 

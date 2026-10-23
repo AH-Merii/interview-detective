@@ -8,15 +8,18 @@ outputs land in `<case>/NN_*/`.
 | Stage | Job | Input | Output | Human check |
 |---|---|---|---|---|
 | `01_intake` | ask the user what they know | the user | `intake.md` (`confirmed: true`) | user confirms it |
-| `02_research` | parallel detective lanes | 01 | `lanes/*.md`, `findings.md` | user strikes wrong leads |
+| `02_research` | parallel detective lanes | 01 | `lanes/*.md`, `findings.md` + `.html`, `why/` | user strikes wrong leads |
 | `03_glassdoor` | scrape related reviews, group A/B/C | 01 | `scope.json`, `interviews.json`, `stats.md`, `processes.md` | user approves scope before a big scrape |
-| `04_question-check` | is each question standard? | 01, 02, 03 | `question-bank.md` | user skims the bank |
-| `05_report` | summary, findings, practice | 01–04 | `report.md` | user reads it |
+| `04_question-check` | is each question standard? | 01, 02, 03 | `question-bank.md` + `.html`, `why/` | user skims the bank |
+| `05_report` | summary, plan, findings, practice | 01–04 | `report.md` + `.html` | user reads it |
 
 02 and 03 depend only on 01, so they run at the same time. First the user signs in to every site the
 case reads behind a login, in one window (`_shared/browser.md`); then start the 02 lanes in the
 background and work through 03 with the user. Pages that 02's lanes still find blocked, on any site, go
 to the user in one more window.
+
+The user reads the HTML and edits the markdown; each inference links to a why page that shows what it
+rests on (`_shared/pages.md`).
 
 Factory (every run): `stages/`, `_shared/`, `tools/`. Product (each run): `<cases>/<case>/`.
 Status is whatever exists: `tools/status.py` (rules in its docstring).
