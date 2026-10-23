@@ -11,6 +11,12 @@ inputs (link, Glassdoor id, or file). Aim for something the user can read in 15 
 Five to eight sentences: what this round most likely is, what it tests, the two or three things to
 prepare first, and how sure we are.
 
+## Practice plan
+A day-by-day plan sized to the time the intake gives (days, hours a day), for the next round first.
+Each day names its question-bank ids and what to do with each, with rough hours marked as estimates.
+End with what to skip if time runs short, and a short checklist for the interview day drawn from the
+findings.
+
 ## What the process looks like
 The stages candidates describe, in order, with how long each takes and how often each is reported
 (from stats.md and findings). Note when the process changed and which reports are recent.
@@ -40,5 +46,8 @@ What was searched and came up empty, and what the user might ask the recruiter.
 Every link cited above, once.
 ```
 
-Favour items the user starred (`★`) in the question bank. Do not invent questions with no basis in the
-inputs; a "worth preparing" item names the finding or topic it comes from.
+Weight the report toward the next round; later rounds come second. Favour items the user starred
+(`★`) in the question bank. Link each inference to its why page, `([why](../<stage>/why/<slug>.html))`,
+and mark an inference no page covers `speculative`, saying in a clause what it rests on. Do not invent
+questions with no basis in the inputs; a "worth preparing" item names the finding or topic it comes
+from.

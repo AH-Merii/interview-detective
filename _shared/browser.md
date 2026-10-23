@@ -13,7 +13,8 @@ you in", which also blocks every "Sign in with Google" button.
 Once the intake is confirmed, before 02's lanes and 03 start, get the user signed in to every site the
 case reads behind a login:
 - Glassdoor: 03 scrapes its interview reviews (Sign in with Google works there);
-- LinkedIn: the people lanes look up the interviewer and the team, and profiles and posts need a login;
+- LinkedIn: the people lane looks up the interviewer, the panel and people in the role, and profiles
+  and posts need a login;
 - any other site the intake names that needs an account.
 
 `uv run tools/browser.py start` on a page of each site, and check each tab as in step 4 below. Every

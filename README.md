@@ -8,11 +8,17 @@ investigates in parallel and hands back a sourced report with the questions you 
 - **Glassdoor**: scrapes the company's interview reviews for related roles into JSON you can query,
   grouped by how close each role is to yours. You log in once in a browser window it opens on its own
   workspace; it never takes your focus.
-- **GitHub and the web**: the company's repos and stack, public work by people who work there, prep
-  repos and take-home solutions past candidates uploaded, write-ups, talks, archived job posts.
+- **People**: your interviewer and panel, and people already in your role or next to it, found on the
+  company's LinkedIn People page. For each, their public GitHub, including repos made around when they
+  joined, where hires often leave their own interview exercise.
+- **GitHub and the web**: the company's repos and stack, prep repos and take-home solutions past
+  candidates uploaded, write-ups, talks, archived job posts.
 - **Question check**: is each question a standard problem, a variant of one, or specific to this
   company, with a link to practise on.
-- **Report**: summary, findings with sources and confidence, Glassdoor numbers, practice questions.
+- **Report**: summary, a day-by-day practice plan sized to the time you have, findings with sources and
+  confidence, Glassdoor numbers, practice questions.
+- **Pages to read**: each stage you read opens as an HTML page, and every guess links to a page that
+  shows what it rests on: the sources, how they add up, and what cuts against it.
 
 ## Get started
 
@@ -48,9 +54,9 @@ and the [`gh`](https://cli.github.com/) CLI, logged in. The setup wizard checks 
 
 ## What a run looks like
 
-1. **Intake.** It asks for the company, role and round, and what you already have: emails, a job post,
-   a take-home. It writes `<case>/01_intake/intake.md` in your cases folder; read it, fix anything wrong, and say
-   it's right.
+1. **Intake.** It asks for the company, role and round, what you already have (emails, a job post, a
+   take-home), and how much time you have to prepare. It writes `<case>/01_intake/intake.md` in your
+   cases folder; read it, fix anything wrong, and say it's right.
 2. **Sign in, then research and Glassdoor at the same time.** A Chromium window opens on a new
    workspace called `interview-detective` on your current screen, with a tab for each site the case
    reads behind a login: Glassdoor (Sign in with Google works) and LinkedIn, plus any your intake names.
@@ -60,11 +66,13 @@ and the [`gh`](https://cli.github.com/) CLI, logged in. The setup wizard checks 
    Nothing can drive that window while you use it, so sites that refuse automated browsers still let
    you sign in. Claude reopens the browser for its agents once you close it.
 3. **Question check.** Every reported question is matched to a standard problem, a variant, or marked
-   as specific to the company. Star (★) the ones you want the report to favour.
-4. **Report.** `<case>/05_report/report.md`: summary, findings with sources, Glassdoor
+   as specific to the company, with the next round's questions first. Star (★) the ones you want the
+   report to favour.
+4. **Report.** `<case>/05_report/report.md`: summary, practice plan, findings with sources, Glassdoor
    numbers and practice questions.
 
-It stops after each stage for you to read what it wrote, and the next stage reads your edits.
+It stops after each stage for you to read what it wrote, as an HTML page it gives you a command to
+open, and the next stage reads your edits to the markdown beside it.
 Asking for status lists every case and its next stage, and saying "resume" picks one up.
 
 Your logins stay in the browser's own profile, in `~/.cache/interview-detective/browser/`.
@@ -79,6 +87,7 @@ carry the state, and each stage's contract says exactly what it reads and writes
 - [The skill](skills/interview-detective/SKILL.md): where everything lives, and where to go next.
 - [`_shared/agent-tiers.md`](_shared/agent-tiers.md): which model tier does which job.
 - [`_shared/browser.md`](_shared/browser.md): the browser, and handing logins to you.
+- [`_shared/pages.md`](_shared/pages.md): the pages you read, and the why page behind each guess.
 - [`setup/wizard.sh`](setup/wizard.sh): the first-run setup.
 
 The plugin is the factory: contracts, rules, templates and tools, replaced whole on each update. The

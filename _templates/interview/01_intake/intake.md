@@ -36,5 +36,8 @@ and adjacent ones (group B):
 - A:
 - B:
 
+## Time to prepare
+- Days they can prepare on, and hours a day (the report's practice plan is sized to this):
+
 ## What the user wants most from this
 -
