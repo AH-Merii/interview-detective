@@ -17,6 +17,7 @@ Run with: uv run tools/glassdoor.py COMMAND ...
 
 Glassdoor builds each interviews page with its records embedded in the Next.js payload
 ("interviews":[...] beside "filteredInterviewCount"), so nothing is scraped from the rendered text.
+Long texts sit in text rows of their own, which the records point at ("$60"); they are put back.
 """
 
 import json
@@ -31,23 +32,57 @@ sys.path.insert(0, str(Path(__file__).parent))
 from browser import Tab
 
 DEC = json.JSONDecoder()
+ROW = re.compile(rb"([0-9a-f]*):(?:T([0-9a-f]+),)?")
+
+
+def flight(tab):
+    """The page's Next.js flight stream: its push([1, chunk]) data joined, as the client joins it."""
+    pushes = tab.js('[...document.scripts].map(s=>s.textContent).filter(t=>t.startsWith("self.__next_f.push"))')
+    chunks = (re.match(r"self\.__next_f\.push\(\[1,(.*)\]\)\s*$", p, re.DOTALL) for p in pushes or [])
+    return "".join(json.loads(m.group(1)) for m in chunks if m)
+
+
+def text_rows(stream):
+    """The stream's text rows by id. A text row is "<hex id>:T<hex byte length>,<text>" with no newline
+    after; every other row ends at a newline."""
+    b, rows, pos = stream.encode(), {}, 0
+    while pos < len(b) and (m := ROW.match(b, pos)):
+        if m[2] is not None:
+            pos = m.end() + int(m[2], 16)
+            rows[m[1].decode()] = b[m.end() : pos].decode()
+        else:
+            pos = b.find(b"\n", m.end()) + 1
+            if not pos:
+                break
+    return rows
+
+
+def resolve(value, texts, interview):
+    """`value` with React's string encoding undone: "$<id>" is the text row it points at, and "$$..." a
+    string that began with "$"."""
+    if isinstance(value, dict):
+        return {k: resolve(v, texts, interview) for k, v in value.items()}
+    if isinstance(value, list):
+        return [resolve(v, texts, interview) for v in value]
+    if isinstance(value, str) and value.startswith("$$"):
+        return value[1:]
+    if isinstance(value, str) and re.fullmatch(r"\$[0-9a-f]+", value):
+        if value[1:] in texts:
+            return texts[value[1:]]
+        print(f"  interview {interview}: {value} points at a row the page doesn't hold; left as it is")
+    return value
 
 
 def payload(tab):
     """(interviews on this page, filteredInterviewCount) from the page's embedded data, or (None, None)."""
-    pushes = tab.js('[...document.scripts].map(s=>s.textContent).filter(t=>t.startsWith("self.__next_f.push"))')
-    for p in pushes or []:
-        m = re.match(r"self\.__next_f\.push\(\[1,(.*)\]\)\s*$", p, re.DOTALL)
-        if not m:
-            continue
-        s = json.loads(m.group(1))
-        i = s.find('"interviews":[')
-        if i < 0:
-            continue
-        items = DEC.raw_decode(s, i + len('"interviews":'))[0]
-        c = re.search(r'"filteredInterviewCount":(\d+)', s)
-        return items, int(c.group(1)) if c else None
-    return None, None
+    s = flight(tab)
+    i = s.find('"interviews":[')
+    if i < 0:
+        return None, None
+    items = DEC.raw_decode(s, i + len('"interviews":'))[0]
+    texts = text_rows(s)
+    c = re.search(r'"filteredInterviewCount":(\d+)', s)
+    return [resolve(it, texts, it.get("id")) for it in items], int(c.group(1)) if c else None
 
 
 def load(tab, url):
