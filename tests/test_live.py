@@ -25,6 +25,9 @@ class LiveGlassdoorTest(unittest.TestCase):
         self.assertTrue(items)
         for field in ("id", "jobTitle", "reviewDateTime", "outcome", "difficulty", "userQuestions"):
             self.assertIn(field, items[0])
+        for it in items:
+            for text in [it.get("processDescription")] + [q["question"] for q in it["userQuestions"]]:
+                self.assertNotRegex(text or "", r"^\$[0-9a-f]+$", f"interview {it['id']}: a text left as a reference")
         self.assertTrue(
             glassdoor.next_url(glassdoor.Tab("glassdoor"), 2) or count <= len(items),
             "more reviews than one page, but no link to page 2",

@@ -6,6 +6,7 @@ pushes) and its pager links. tests/test_live.py checks the real site.
 
 import contextlib
 import io
+import itertools
 import json
 import tempfile
 import unittest
@@ -46,17 +47,22 @@ def record(id, role="Machine Learning Engineer", reviewed="2026-01-01T10:00:00",
     return r
 
 
-def scripts(items, count):
+def scripts(items, count, texts=None, cuts=("5:[",)):
     """The page's flight pushes as Glassdoor sends them: the records sit inside a JSON-encoded string,
-    among pushes that hold other things."""
+    among pushes that hold other things.
+
+    `texts` (hex id -> text) are the long texts, which Next.js sends as text rows ahead of the records:
+    "<id>:T<hex byte length>,<text>", with no newline after. A record points at one with "$<id>".
+    The stream starts a new push before each string in `cuts`."""
     data = {"interviews": items, "other": 1}
     if count is not None:
         data["filteredInterviewCount"] = count
-    flight = '5:["$","$L6",null,' + json.dumps(data, separators=(",", ":")) + "]\n"  # compact, as Next.js writes it
-    return [
-        "self.__next_f.push([0])",
-        f"self.__next_f.push([1,{json.dumps('2:I[123,[],' + chr(34) + 'default' + chr(34) + ']' + chr(10))}])",
-        f"self.__next_f.push([1,{json.dumps(flight)}])",
+    stream = '2:I[123,[],"default"]\n'
+    stream += "".join(f"{id}:T{len(t.encode()):x},{t}" for id, t in (texts or {}).items())
+    stream += '5:["$","$L6",null,' + json.dumps(data, separators=(",", ":")) + "]\n"  # compact, as Next.js writes it
+    at = sorted({0, len(stream), *(stream.index(c) for c in cuts)})
+    return ["self.__next_f.push([0])"] + [
+        f"self.__next_f.push([1,{json.dumps(stream[a:b])}])" for a, b in itertools.pairwise(at)
     ]
 
 
@@ -154,6 +160,30 @@ class ScrapeTest(unittest.TestCase):
         q = 'Given "a]b", return [x for x in y]}, ok? naïve, 日本'
         got = self.scrape(FakeSite(paged([record(1, userQuestions=[{"id": 9, "question": q}])])), BASE)
         self.assertEqual(got[0]["userQuestions"][0]["question"], q)
+
+    def test_long_texts_arrive_whole_wherever_the_pushes_cut_the_stream(self):
+        question = "Fermi estimate: parcels per van per day — naïve, 日本 🚚"
+        process = "Two rounds.\nThen a case study on routing."
+        records = [record(1, processDescription="$20", userQuestions=[{"id": 9, "question": "$1f"}]), record(2)]
+        texts = {"1f": question, "20": process}  # back to back, the multi-byte one first
+        for cuts in [(), ("5:[",), ("1f:T", "20:T"), ("本",), ("Then a case",), ('"id":2',)]:
+            with self.subTest(cuts=cuts):
+                page = {BASE: {"scripts": scripts(records, 2, texts, cuts), "links": []}}
+                got = {r["id"]: r for r in self.scrape(FakeSite(page), BASE)}
+                self.assertEqual(got[1]["processDescription"], process)
+                self.assertEqual(got[1]["userQuestions"][0]["question"], question)
+                self.assertEqual(got[2]["processDescription"], "Two rounds.")
+
+    def test_a_text_that_starts_with_a_dollar_arrives_as_written(self):
+        # React escapes a leading "$" as "$$", so it can't be read as a reference
+        q = [{"id": 9, "question": "$$100k to spend: where first?"}]
+        got = self.scrape(FakeSite(paged([record(1, userQuestions=q)])), BASE)
+        self.assertEqual(got[0]["userQuestions"][0]["question"], "$100k to spend: where first?")
+
+    def test_a_text_the_page_does_not_hold_is_flagged(self):
+        self.scrape(FakeSite(paged([record(4242, processDescription="$2a")])), BASE)
+        self.assertIn("4242", self.log)
+        self.assertIn("$2a", self.log)
 
     def test_a_page_without_reviews_stops_and_says_why(self):
         site = FakeSite({BASE: {"scripts": [], "title": "Just a moment..."}})
