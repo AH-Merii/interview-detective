@@ -10,7 +10,7 @@ to the newest model in that family. Never use `fable`.
 |---|---|---|
 | `haiku` | Scoped, mechanical, checkable: a fixed input, a fixed output shape | reading a page the user unlocked; classifying a batch of questions against known problem sets; mapping role titles to groups |
 | `sonnet` | Searching a defined area with judgement about relevance | similar exercises on the web; the company's GitHub organisation; candidates' prep repos |
-| `opus` | Open-ended detective work and synthesis; no fixed path to the answer | people-github lane; the wildcard lane; writing the report |
+| `opus` | Open-ended detective work and synthesis; no fixed path to the answer | the people lane; the wildcard lane; writing the report |
 
 Escalate, don't guess: when a `haiku` agent marks an item `unsure`, rerun that item with `sonnet`.
 
