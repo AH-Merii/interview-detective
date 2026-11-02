@@ -14,6 +14,7 @@ prepare first, and how sure we are.
 ## Practice plan
 A day-by-day plan sized to the time the intake gives (days, hours a day), for the next round first.
 Each day names its question-bank ids and what to do with each, with rough hours marked as estimates.
+Work through the bank in its priority order: priority 1 first.
 End with what to skip if time runs short, and a short checklist for the interview day drawn from the
 findings.
 
@@ -32,10 +33,11 @@ A small table per group (A, B): interviews, outcomes, difficulty, experience, da
 
 ## Practice questions
 ### Most likely
-Questions reported for this role recently, or found in this company's materials. For each: the
-question, why it is likely (source), and the closest public version to practise.
+The bank's priority 1 and 2 items, in its order. For each: the question, why it is likely (source),
+and the closest public version to practise.
 ### Worth preparing
-Standard problems on the topics that keep coming up, and variants of reported questions.
+The bank's priority 3 items: standard problems on the topics that keep coming up, and variants of
+reported questions.
 ### Questions to ask them
 Three to five, grounded in the findings.
 
@@ -46,7 +48,8 @@ What was searched and came up empty, and what the user might ask the recruiter.
 Every link cited above, once.
 ```
 
-Weight the report toward the next round; later rounds come second. Favour items the user starred
+Keep the bank's priority order wherever the report lists questions, weighted toward the next round;
+later rounds come second. Favour items the user starred
 (`★`) in the question bank. Link each inference to its why page, `([why](../<stage>/why/<slug>.html))`,
 and mark an inference no page covers `speculative`, saying in a clause what it rests on. Do not invent
 questions with no basis in the inputs; a "worth preparing" item names the finding or topic it comes
