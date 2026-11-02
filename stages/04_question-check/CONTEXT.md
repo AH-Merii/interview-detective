@@ -20,9 +20,11 @@ Do NOT load: `interviews.json` whole, `02_research/lanes/*` (findings.md already
    background. Each gets `references/question-bank.md`, `_shared/evidence.md`, the batch, and writes
    `<case>/04_question-check/batches/NN.md`.
 3. Rerun every item a batch marked `unsure` with a `sonnet` agent, replacing it in the batch file.
-4. Merge the batches into `question-bank.md`. Put the questions that bear on the next round first, then
-   those for later rounds; within each, group A and intake first, then findings, then B, and the most
-   recent and most often reported first.
+4. Merge the batches into `question-bank.md`, sorted by priority. Give each item its priority
+   (`references/question-bank.md`), then put the items in priority order, 1 first, a section per
+   priority. Within a priority: the next round's items before later rounds', then group A and intake,
+   then findings, then B, then the most recent and most often reported first. A follow-up never sits
+   above the item it builds on. Number the items in this final order.
 5. Check each "Closest public version" link yourself before the user sees it (LeetCode: the GraphQL
    query in `references/question-bank.md`).
 6. Write a why page for each inference in the bank, such as a guessed shape for a vague question, into
@@ -34,6 +36,7 @@ Do NOT load: `interviews.json` whole, `02_research/lanes/*` (findings.md already
   and `why/claims.json` with a page per inference
 
 ## Human check
-The user skims `question-bank.html`, then deletes what is irrelevant from `question-bank.md` and stars
-(`★`) what they most want to practise; 05 favours starred items. Render and check again after their
-edits.
+The user skims `question-bank.html`, then deletes what is irrelevant from `question-bank.md`, stars
+(`★`) what they most want to practise, and changes any priority they disagree with; 05 follows the
+bank's order and favours starred items. If a priority changed, re-sort and renumber. Render and check
+again after their edits.

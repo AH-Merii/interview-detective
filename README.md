@@ -66,8 +66,9 @@ and the [`gh`](https://cli.github.com/) CLI, logged in. The setup wizard checks 
    Nothing can drive that window while you use it, so sites that refuse automated browsers still let
    you sign in. Claude reopens the browser for its agents once you close it.
 3. **Question check.** Every reported question is matched to a standard problem, a variant, or marked
-   as specific to the company, with the next round's questions first. Star (★) the ones you want the
-   report to favour.
+   as specific to the company, and the bank is sorted by priority: the questions most likely to decide
+   the next round come first. Star (★) the ones you want the report to favour, or change a priority
+   you disagree with.
 4. **Report.** `<case>/05_report/report.md`: summary, practice plan, findings with sources, Glassdoor
    numbers and practice questions.
 
