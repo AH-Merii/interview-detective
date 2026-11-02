@@ -8,7 +8,8 @@ Run with: uv run tools/glassdoor.py COMMAND ...
 
   probe URL                       load page 1; print the interview count, pages and roles on it
   scrape OUT.json URL [URL...]    read every page of each URL (one per role filter, or the
-                                  unfiltered page), merged by interview id
+                                  unfiltered page), merged by interview id into OUT.json, which is
+                                  saved after every page: a run a check stops keeps what it read
   normalize RAW.json SCOPE.json OUT.json
                                   flatten the records and tag each with its group from SCOPE.json
   roles OUT.json                  role -> count, with the group each landed in
@@ -125,7 +126,9 @@ def probe(url):
 
 def scrape(out, urls):
     tab = Tab("glassdoor")
-    found = {}
+    out = Path(out)
+    # a rerun after a check adds to what the stopped run saved, instead of starting from nothing
+    found = {r["id"]: r for r in json.loads(out.read_text())} if out.exists() else {}
     for url in urls:
         items, count = load(tab, url)
         print(f"{url}\n  {count} interviews")
@@ -135,6 +138,7 @@ def scrape(out, urls):
                 it["_source_url"] = url
                 found[it["id"]] = it
             got += len(items)
+            out.write_text(json.dumps(list(found.values()), indent=1, ensure_ascii=False))
             print(f"  page {page}: {len(items)}")
             if not items or (count is not None and got >= count):  # no count: read until no next page
                 break
@@ -145,7 +149,6 @@ def scrape(out, urls):
                 break
             time.sleep(random.uniform(3, 6))  # a person's pace, not a crawler's
             items, _ = load(tab, nxt)
-    Path(out).write_text(json.dumps(list(found.values()), indent=1, ensure_ascii=False))
     print(f"{len(found)} unique interviews -> {out}")
 
 

@@ -106,18 +106,25 @@ class FakeSite:
         return Tab()
 
 
+BLOCK = {"scripts": [], "title": "Just a moment..."}  # a Cloudflare check: no reviews on the page
+
+
 class ScrapeTest(unittest.TestCase):
-    def scrape(self, site, *urls):
-        out = Path(self.enterContext(tempfile.TemporaryDirectory())) / "raw.json"
+    def scrape(self, site, *urls, out=None):
+        """Scrape into `out` (a fresh file by default); self.out names it, for reading after a stop."""
+        self.out = out or Path(self.enterContext(tempfile.TemporaryDirectory())) / "raw.json"
         self.sleeps = []
         with (
             mock.patch.object(glassdoor, "Tab", site.tab),
             mock.patch.object(glassdoor.time, "sleep", self.sleeps.append),
             contextlib.redirect_stdout(io.StringIO()) as log,
         ):
-            glassdoor.scrape(out, urls)
+            glassdoor.scrape(self.out, urls)
         self.log = log.getvalue()
-        return json.loads(out.read_text())
+        return json.loads(self.out.read_text())
+
+    def saved_ids(self):
+        return sorted(r["id"] for r in json.loads(self.out.read_text()))
 
     def test_reads_every_page_of_a_list(self):
         site = FakeSite(paged([record(i) for i in range(1, 13)]))
@@ -191,6 +198,23 @@ class ScrapeTest(unittest.TestCase):
             self.scrape(site, BASE)
         self.assertIn("Just a moment...", str(e.exception.code))
         self.assertIn("ask the user", str(e.exception.code))
+
+    def test_a_check_partway_through_keeps_the_pages_read_before_it(self):
+        site = FakeSite(paged([record(i) for i in range(1, 16)]))
+        site.pages[page_url(BASE, 3)] = BLOCK
+        with self.assertRaises(SystemExit):
+            self.scrape(site, BASE)
+        self.assertEqual(self.saved_ids(), list(range(1, 11)))
+
+    def test_a_rerun_keeps_what_an_earlier_run_saved(self):
+        # the first run read pages 1-2 before a check; the rerun is stopped sooner, on page 2
+        out = Path(self.enterContext(tempfile.TemporaryDirectory())) / "raw.json"
+        out.write_text(json.dumps([record(i) for i in range(1, 11)]))
+        site = FakeSite(paged([record(i) for i in range(1, 16)]))
+        site.pages[page_url(BASE, 2)] = BLOCK
+        with self.assertRaises(SystemExit):
+            self.scrape(site, BASE, out=out)
+        self.assertEqual(self.saved_ids(), list(range(1, 11)))
 
 
 SCOPE = {
