@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.5.0](https://github.com/AH-Merii/interview-detective/compare/v0.4.0...v0.5.0) (2026-11-02)
+
+
+### Features
+
+* **question-check:** sort the question bank by priority ([#21](https://github.com/AH-Merii/interview-detective/issues/21)) ([b76f978](https://github.com/AH-Merii/interview-detective/commit/b76f978b0d9687db885d18e1a1fae36a094a3a92))
+
+
+### Bug Fixes
+
+* **glassdoor:** a scrape a check stops keeps the pages it read ([#22](https://github.com/AH-Merii/interview-detective/issues/22)) ([811435e](https://github.com/AH-Merii/interview-detective/commit/811435ea1fbeeda8ef85907a60ac0c3cb572bbeb))
+
 ## [0.4.0](https://github.com/AH-Merii/interview-detective/compare/v0.3.1...v0.4.0) (2026-10-23)
 
 
